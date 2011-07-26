@@ -1,4 +1,4 @@
-package dk.apaq.printing.core.abilities;
+package dk.apaq.printing.core;
 
 /**
  *
