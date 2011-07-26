@@ -1,6 +1,5 @@
 package dk.apaq.printing.core;
 
-import dk.apaq.printing.core.abilities.PaperSize;
 import java.awt.image.BufferedImage;
 import java.awt.print.Pageable;
 import java.awt.print.Printable;
