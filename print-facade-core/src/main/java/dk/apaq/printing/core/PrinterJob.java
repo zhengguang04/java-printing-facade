@@ -13,7 +13,7 @@ public class PrinterJob<T> {
     private final Printer printer;
     private final T data;
     private int copies;
-    private PaperSize paper;
+    private Paper paper;
     private boolean color;
 
     private PrinterJob(Printer printer, T data) {
@@ -37,11 +37,11 @@ public class PrinterJob<T> {
         this.color = color;
     }
 
-    public PaperSize getPaper() {
+    public Paper getPaper() {
         return paper;
     }
 
-    public void setPaper(PaperSize paper) {
+    public void setPaper(Paper paper) {
         this.paper = paper;
     }
 

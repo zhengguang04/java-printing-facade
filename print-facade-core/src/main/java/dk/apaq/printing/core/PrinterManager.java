@@ -1,6 +1,7 @@
 package dk.apaq.printing.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -31,11 +32,30 @@ public class PrinterManager implements PrinterListChangeNotifier {
         plugin.removeListener(pluginListener);
     }
 
+    public int getPluginCount() {
+        return plugins.size();
+    }
+
+    public PrinterManagerPlugin getPlugin(int index) {
+        return plugins.get(index);
+    }
+
+    public List<Printer> getPrinters() {
+        List<Printer> printerlist = new ArrayList<Printer>();
+        for (PrinterManagerPlugin plugin : plugins) {
+            for (Printer printer : plugin.getPrinters()) {
+                printerlist.add(printer);
+            }
+        }
+        return Collections.unmodifiableList(printerlist);
+    }
+
     public void print(PrinterJob job) {
         for (PrinterManagerPlugin plugin : plugins) {
             for (Printer printer : plugin.getPrinters()) {
                 if (job.getPrinter().getId().equals(printer.getId())) {
                     plugin.print(job);
+                    return;
                 }
             }
         }
