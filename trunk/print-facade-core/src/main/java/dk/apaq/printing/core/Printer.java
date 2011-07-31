@@ -11,8 +11,8 @@ public interface Printer {
     String description();
 
     boolean supportsColor();
-    PaperSize[] getSupportedPaperSizes();
-    PrintableArea getPrintableArea(PaperSize paperSize);
+    Paper[] getSupportedPapers();
+    Margin getPhysicalMargin(Paper paperSize);
 
     PrinterState getState();
 
