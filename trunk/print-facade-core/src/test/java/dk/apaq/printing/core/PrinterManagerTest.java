@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package dk.apaq.printing.core;
 
 import java.awt.image.BufferedImage;
@@ -71,13 +66,21 @@ public class PrinterManagerTest extends TestCase {
 
     public void testAddListener() {
         System.out.println("addListener");
-        PrinterListChangeListener listener = null;
-        PrinterManager instance = new PrinterManager();
-        instance.addListener(listener);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        MockPrinterListListener listener = new MockPrinterListListener();
+        PrinterManager manager = new PrinterManager();
+
+        Paper[] papers = new Paper[]{Paper.A4};
+        Printer printer = new MockPrinter("test", "test", "", true, papers);
+        MockPlugin plugin = new MockPlugin();
+        manager.addPlugin(plugin);
+        
+        manager.addListener(listener);
+        plugin.addPrinter(printer);
+
+        assertTrue(listener.isCalled());
     }
 
+    /*
     public void testRemoveListener() {
         System.out.println("removeListener");
         PrinterListChangeListener listener = null;
@@ -86,5 +89,5 @@ public class PrinterManagerTest extends TestCase {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
-
+*/
 }

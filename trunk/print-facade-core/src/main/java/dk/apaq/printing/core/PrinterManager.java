@@ -17,8 +17,9 @@ public class PrinterManager implements PrinterListChangeNotifier {
     private class PluginListener implements PrinterListChangeListener {
 
         public void onPrinterListChange(PrinterEvent event) {
-            //update stuff
-            //rethrow event to listeners
+            for(PrinterListChangeListener listener : listeners) {
+                listener.onPrinterListChange(event);
+            }
         }
     }
 

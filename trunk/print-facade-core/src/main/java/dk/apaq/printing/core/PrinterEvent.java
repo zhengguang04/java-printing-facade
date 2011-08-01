@@ -6,11 +6,15 @@ package dk.apaq.printing.core;
  */
 public class PrinterEvent {
 
-    private Object source;
+    private final PrinterManagerPlugin sourcePlugin;
 
-    public PrinterEvent(Object source) {
-        this.source = source;
+    public PrinterEvent(PrinterManagerPlugin sourcePlugin) {
+        this.sourcePlugin = sourcePlugin;
     }
-    
+
+    public PrinterManagerPlugin getSourcePlugin() {
+        return sourcePlugin;
+    }
 
 }
+

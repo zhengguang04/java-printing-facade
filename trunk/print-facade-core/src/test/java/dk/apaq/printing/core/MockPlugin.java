@@ -2,41 +2,66 @@ package dk.apaq.printing.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
  *
  * @author michaelzachariassenkrog
  */
-public class MockPlugin implements PrinterManagerPlugin {
+public class MockPlugin extends AbstractPrinterManagerPlugin {
 
-    private final Printer[] printers;
+    private final List<Printer> printers = new ArrayList<Printer>();
     private PrinterJob lastJob;
-    private List<PrinterListChangeListener> listeners = new ArrayList<PrinterListChangeListener>();
+    
+    public MockPlugin() {
+    }
 
     public MockPlugin(Printer ... printers) {
-        this.printers = printers;
+        this.printers.addAll(Arrays.asList(printers));
+    }
+
+    public Printer getDefaultPrinter() {
+        if(printers.isEmpty()) {
+            return null;
+        } else {
+            return printers.get(0);
+        }
     }
 
 
+
     public List<Printer> getPrinters() {
-        return Arrays.asList(printers);
+        return Collections.unmodifiableList(printers);
     }
 
     public void print(PrinterJob job) {
         this.lastJob = job;
     }
 
-    public void addListener(PrinterListChangeListener listener) {
-        listeners.add(listener);
-    }
-
-    public void removeListener(PrinterListChangeListener listener) {
-        listeners.remove(listener);
-    }
 
     public PrinterJob getLastJob() {
         return lastJob;
     }
+
+    public void addPrinter(Printer printer) {
+        printers.add(printer);
+        fireChangeEvent();
+    }
+
+    public int getPrinterCount() {
+        return printers.size();
+    }
+
+    public Printer getPrinter(int index) {
+        return printers.get(index);
+    }
+
+    public void removePrinter(int index) {
+        printers.remove(index);
+        fireChangeEvent();
+    }
+
+
 
 }
