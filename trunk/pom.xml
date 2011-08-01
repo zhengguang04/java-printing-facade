@@ -17,5 +17,6 @@
   </dependencies>
   <modules>
     <module>print-facade-core</module>
+    <module>printing-facade-basic</module>
   </modules>
 </project>
