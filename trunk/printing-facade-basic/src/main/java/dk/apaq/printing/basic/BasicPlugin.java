@@ -6,6 +6,9 @@ import dk.apaq.printing.core.Paper;
 import dk.apaq.printing.core.Printer;
 import dk.apaq.printing.core.PrinterJob;
 import dk.apaq.printing.core.PrinterListChangeListener;
+import java.awt.image.BufferedImage;
+import java.awt.print.Pageable;
+import java.awt.print.Printable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,7 +52,28 @@ public class BasicPlugin extends AbstractPrinterManagerPlugin {
     }
 
     public void print(PrinterJob job) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        java.awt.print.PrinterJob awtJob = java.awt.print.PrinterJob.getPrinterJob();
+
+        if(job.getData() instanceof Printable) {
+            awtJob.setPrintable((Printable) job.getData());
+        }
+
+        if(job.getData() instanceof Pageable) {
+            awtJob.setPageable((Pageable) job.getData());
+        }
+
+        if(job.getData() instanceof BufferedImage) {
+            //awtJob.setPageable((Pageable) job.getData());
+        }
+
+        if(job.getData() instanceof String) {
+            //awtJob.setPageable((Pageable) job.getData());
+        }
+
+        
+
+
+
     }
 
     

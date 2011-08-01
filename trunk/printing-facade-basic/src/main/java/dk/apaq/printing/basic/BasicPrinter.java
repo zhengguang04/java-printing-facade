@@ -23,10 +23,6 @@ import javax.print.attribute.standard.PrinterInfo;
  */
 public class BasicPrinter implements Printer {
 
-    private static final Paper[] CHECKED_PAPER_LIST = {Paper.A0, Paper.A1, Paper.A2,
-                                                        Paper.A3, Paper.A4, Paper.A5,
-                                                        Paper.A6, Paper.A7, Paper.A8,
-                                                        Paper.A9, Paper.A10};
     private final PrintService ps;
     private final Map<Paper, Margin> map = new HashMap<Paper, Margin>();
 
@@ -34,9 +30,6 @@ public class BasicPrinter implements Printer {
     public BasicPrinter(PrintService ps) {
         this.ps = ps;
         this.createMediaSizeArray(ps);
-        /*for(Paper paper : CHECKED_PAPER_LIST) {
-            checkAndAddSize(paper);
-        }*/
     }
 
     public String getId() {
@@ -112,7 +105,12 @@ public class BasicPrinter implements Printer {
                             double width = size.getX(MediaSize.MM);
                             double height = size.getY(MediaSize.MM);
                             Paper paper = new Paper(width, height);
-                            Margin margin = new Margin(values[0], values[1], width - values[2] - values[0] , height - values[3] - values[1]);
+                            
+                            double left = Math.max(values[0], 0);
+                            double top = Math.max(values[1], 0);
+                            double right = Math.max(width - values[2] - values[0], 0);
+                            double bottom = Math.max(height - values[3] - values[1], 0);
+                            Margin margin = new Margin(left, top, right, bottom);
 
                             map.put(paper, margin);
                             break;
