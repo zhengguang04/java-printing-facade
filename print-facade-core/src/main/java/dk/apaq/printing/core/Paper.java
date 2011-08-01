@@ -1,10 +1,14 @@
 package dk.apaq.printing.core;
 
+import java.text.NumberFormat;
+
 /**
  *
  * @author michael
  */
 public class Paper {
+
+    private static final NumberFormat NUMBER_FORMAT = NumberFormat.getNumberInstance();
 
     public static final Paper A0 = new Paper(841, 1189);
     public static final Paper A1 = new Paper(594, 841);
@@ -18,15 +22,18 @@ public class Paper {
     public static final Paper A9 = new Paper(37, 52);
     public static final Paper A10 = new Paper(26, 37);
     
+    
     private final double width;
     private final double height;
-    
+    private final String displayString;
+
     public Paper(double width, double height) {
         this.width = width;
         this.height = height;
+
+        this.displayString = NUMBER_FORMAT.format(width) + "mm x " + NUMBER_FORMAT.format(height) + "mm";
     }
 
-    
     public double getHeight() {
         return height;
     }
@@ -61,4 +68,8 @@ public class Paper {
         return hash;
     }
 
+    @Override
+    public String toString() {
+        return displayString;
+    }
 }
