@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package dk.apaq.printing.core;
 
 import java.util.List;
@@ -13,6 +8,7 @@ import java.util.List;
  */
 public interface PrinterManagerPlugin extends PrinterListChangeNotifier{
 
+    public Printer getDefaultPrinter();
     public List<Printer> getPrinters();
     public void print(PrinterJob job);
 }

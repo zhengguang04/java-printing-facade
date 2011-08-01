@@ -8,9 +8,9 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
   <groupId>dk.apaq.printing</groupId>
-  <artifactId>print-facade-core</artifactId>
+  <artifactId>printing-facade-core</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <name>print-facade-core</name>
+  <name>printing-facade-core</name>
   <url>http://maven.apache.org</url>
     <build>
         <plugins>
