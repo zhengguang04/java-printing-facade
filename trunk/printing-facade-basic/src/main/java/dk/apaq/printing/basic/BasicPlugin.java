@@ -2,11 +2,14 @@ package dk.apaq.printing.basic;
 
 import dk.apaq.printing.core.AbstractPrinterManagerPlugin;
 import dk.apaq.printing.core.Margin;
+import dk.apaq.printing.core.Orientation;
 import dk.apaq.printing.core.Paper;
 import dk.apaq.printing.core.Printer;
 import dk.apaq.printing.core.PrinterJob;
 import dk.apaq.printing.core.PrinterListChangeListener;
+import dk.apaq.printing.core.util.AWTUtil;
 import java.awt.image.BufferedImage;
+import java.awt.print.PageFormat;
 import java.awt.print.Pageable;
 import java.awt.print.Printable;
 import java.util.ArrayList;
@@ -70,9 +73,7 @@ public class BasicPlugin extends AbstractPrinterManagerPlugin {
             //awtJob.setPageable((Pageable) job.getData());
         }
 
-        
-
-
+        PageFormat pf =  AWTUtil.generatePageformat(job.getPaper(), new Margin(0,0,0,0), Orientation.Portrait);
 
     }
 
