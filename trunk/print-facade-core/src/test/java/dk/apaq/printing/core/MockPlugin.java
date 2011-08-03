@@ -37,6 +37,8 @@ public class MockPlugin extends AbstractPrinterManagerPlugin {
 
     public void print(PrinterJob job) {
         this.lastJob = job;
+
+        
     }
 
 

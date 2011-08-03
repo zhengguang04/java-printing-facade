@@ -57,10 +57,14 @@ public class PrinterManagerTest extends TestCase {
 
         BufferedImage img = new BufferedImage(200, 200, BufferedImage.TYPE_INT_ARGB);
         img.createGraphics().drawString("Tes test", 20, 20);
-        PrinterJob job = PrinterJob.createJob(instance.getPrinters().get(0), img);
+        PrinterJob job = PrinterJob.getBuilder(instance.getPrinters().get(0), img).
+                setMargin(new Margin(10, 10, 10, 10)).
+                build();
 
         instance.print(job);
         assertNotNull(plugin.getLastJob());
+
+        assertEquals(1, plugin.getLastJob().getNumberOfPages());
 
     }
 

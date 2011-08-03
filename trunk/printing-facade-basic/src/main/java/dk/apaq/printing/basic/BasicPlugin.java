@@ -32,6 +32,8 @@ public class BasicPlugin extends AbstractPrinterManagerPlugin {
     private final Printer defaultPrinter;;
     private List<Printer> printers = new ArrayList<Printer>();
 
+    
+
     public BasicPlugin() {
         PrintService[] services = PrintServiceLookup.lookupPrintServices(null, null);
         for(PrintService ps : services) {
