@@ -1,8 +1,10 @@
 package dk.apaq.printing.core;
 
 import dk.apaq.printing.core.util.AWTUtil;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.print.PageFormat;
 import java.awt.print.Pageable;
@@ -71,7 +73,24 @@ public class PrinterJob {
         }
 
         public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
-            throw new UnsupportedOperationException("Not supported yet.");
+            if(pageIndex!=0) {
+                return NO_SUCH_PAGE;
+            }
+
+            Graphics2D g2d = (Graphics2D) graphics;
+            AffineTransform at = new AffineTransform();
+            at.translate(0, 0);
+
+            //We need to scale the image properly so that it fits on one page.
+            double xScale = pageFormat.getWidth() / image.getWidth();
+            double yScale = pageFormat.getHeight() / image.getHeight();
+
+            // Maintain the aspect ratio by taking the min of those 2 factors and using it to scale both dimensions.
+            double aspectScale = Math.min(xScale, yScale);
+            at.setToScale(aspectScale, aspectScale);
+            g2d.drawRenderedImage(image, at);
+
+            return Printable.PAGE_EXISTS;
         }
 
 

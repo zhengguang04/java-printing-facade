@@ -33,7 +33,13 @@ public class BasicPrinter implements Printer {
     }
 
     public String getId() {
-        return BasicPlugin.class.getSimpleName() + "#" + hashCode() + "_" + getName();
+        StringBuilder sb = new StringBuilder();
+        sb.append(BasicPlugin.class.getSimpleName()).
+                //append("#").
+                //append(hashCode()).
+                append("_").
+                append(getName().replace(" ", "_"));
+        return sb.toString();
     }
 
     public String getName() {

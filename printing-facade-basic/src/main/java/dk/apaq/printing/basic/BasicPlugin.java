@@ -2,26 +2,26 @@ package dk.apaq.printing.basic;
 
 import dk.apaq.printing.core.AbstractPrinterManagerPlugin;
 import dk.apaq.printing.core.Margin;
-import dk.apaq.printing.core.Orientation;
 import dk.apaq.printing.core.Paper;
 import dk.apaq.printing.core.Printer;
 import dk.apaq.printing.core.PrinterJob;
-import dk.apaq.printing.core.PrinterListChangeListener;
 import dk.apaq.printing.core.util.AWTUtil;
-import java.awt.image.BufferedImage;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.print.PageFormat;
-import java.awt.print.Pageable;
 import java.awt.print.Printable;
+import java.awt.print.PrinterException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
-import javax.print.attribute.Attribute;
-import javax.print.attribute.standard.Chromaticity;
-import javax.print.attribute.standard.ColorSupported;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.standard.MediaPrintableArea;
+import javax.print.attribute.standard.MediaSize;
 
 /**
  *
@@ -32,7 +32,24 @@ public class BasicPlugin extends AbstractPrinterManagerPlugin {
     private final Printer defaultPrinter;;
     private List<Printer> printers = new ArrayList<Printer>();
 
-    
+    private class PrinterJobPrintable implements Printable {
+        private final PrinterJob job;
+
+        public PrinterJobPrintable(PrinterJob job) {
+            this.job = job;
+        }
+
+        public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
+            if(pageIndex>=job.getNumberOfPages()) {
+                return NO_SUCH_PAGE;
+            }
+
+            job.render((Graphics2D) graphics,pageIndex);
+            return PAGE_EXISTS;
+        }
+
+
+    }
 
     public BasicPlugin() {
         PrintService[] services = PrintServiceLookup.lookupPrintServices(null, null);
@@ -48,34 +65,35 @@ public class BasicPlugin extends AbstractPrinterManagerPlugin {
         }
     }
 
+    @Override
     public Printer getDefaultPrinter() {
         return defaultPrinter;
     }
 
+    @Override
     public List<Printer> getPrinters() {
         return Collections.unmodifiableList(printers);
     }
 
+    @Override
     public void print(PrinterJob job) {
-        java.awt.print.PrinterJob awtJob = java.awt.print.PrinterJob.getPrinterJob();
+        try {
+            PageFormat pf = AWTUtil.generatePageformat(job.getPaper(), job.getMargin(), job.getOrientation());
+            PrinterJobPrintable printable = new PrinterJobPrintable(job);
+            Paper paper = job.getPaper();
+            Margin margin = job.getMargin();
 
-        if(job.getData() instanceof Printable) {
-            awtJob.setPrintable((Printable) job.getData());
+            PrintRequestAttributeSet attributes = new HashPrintRequestAttributeSet();
+            attributes.add(MediaSize.findMedia(((Double)paper.getWidth()).floatValue(),
+                                                ((Double)paper.getHeight()).floatValue(),
+                                                MediaSize.MM));
+            attributes.add(AWTUtil.getPrintableArea(paper, margin));
+            java.awt.print.PrinterJob awtJob = java.awt.print.PrinterJob.getPrinterJob();
+            awtJob.setPrintable(printable, pf);
+            awtJob.print(attributes);
+        } catch (PrinterException ex) {
+            throw new dk.apaq.printing.core.PrinterException(ex);
         }
-
-        if(job.getData() instanceof Pageable) {
-            awtJob.setPageable((Pageable) job.getData());
-        }
-
-        if(job.getData() instanceof BufferedImage) {
-            //awtJob.setPageable((Pageable) job.getData());
-        }
-
-        if(job.getData() instanceof String) {
-            //awtJob.setPageable((Pageable) job.getData());
-        }
-
-        PageFormat pf =  AWTUtil.generatePageformat(job.getPaper(), new Margin(0,0,0,0), Orientation.Portrait);
 
     }
 

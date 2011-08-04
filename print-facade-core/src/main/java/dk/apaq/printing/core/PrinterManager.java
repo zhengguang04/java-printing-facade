@@ -13,6 +13,7 @@ public class PrinterManager implements PrinterListChangeNotifier {
     private final List<PrinterManagerPlugin> plugins = new ArrayList<PrinterManagerPlugin>();
     private final List<PrinterListChangeListener> listeners = new ArrayList<PrinterListChangeListener>();
     private final PluginListener pluginListener = new PluginListener();
+    private DefaultPrinterDecisionMaker defaultPrinterDecisionMaker = new FirstInDefaultPrinterDecisionMaker();
 
     private class PluginListener implements PrinterListChangeListener {
 
@@ -51,9 +52,15 @@ public class PrinterManager implements PrinterListChangeNotifier {
         return Collections.unmodifiableList(printerlist);
     }
 
+    public Printer getDefaultPrinter() {
+        return defaultPrinterDecisionMaker.getDefaultPrinter(this);
+    }
+
     public void print(PrinterJob job) {
         for (PrinterManagerPlugin plugin : plugins) {
             for (Printer printer : plugin.getPrinters()) {
+                String id = job.getPrinter().getId();
+                String id2 = printer.getId();
                 if (job.getPrinter().getId().equals(printer.getId())) {
                     plugin.print(job);
                     return;
