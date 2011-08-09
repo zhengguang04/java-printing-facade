@@ -8,7 +8,7 @@ public interface Printer {
 
     String getId();
     String getName();
-    String description();
+    String getDescription();
 
     boolean supportsColor();
     Paper[] getSupportedPapers();

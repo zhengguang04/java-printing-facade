@@ -1,6 +1,9 @@
 package dk.apaq.printing.core;
 
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -71,5 +74,21 @@ public class Paper {
     @Override
     public String toString() {
         return displayString;
+    }
+
+    public static Paper fromString(String value) {
+        String[] array = value.split("x");
+        if (array.length != 2) {
+            throw new IllegalArgumentException("Value should follow syntax '<double>mm x <double>mm");
+        }
+
+        try {
+            double width = NUMBER_FORMAT.parse(array[0].trim().replace("mm", "")).doubleValue();
+            double height = NUMBER_FORMAT.parse(array[1].trim().replace("mm", "")).doubleValue();
+            return new Paper(width, height);
+        } catch (ParseException ex) {
+            throw new IllegalArgumentException("Value should follow syntax '<double>mm x <double>mm");
+        }
+
     }
 }
