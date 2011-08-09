@@ -28,7 +28,7 @@ public class MockPrinter implements Printer {
         return name;
     }
 
-    public String description() {
+    public String getDescription() {
         return description;
     }
 

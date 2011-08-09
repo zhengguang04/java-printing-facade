@@ -46,7 +46,7 @@ public class BasicPrinter implements Printer {
         return ps.getName();
     }
 
-    public String description() {
+    public String getDescription() {
         PrinterInfo attr = ps.getAttribute(PrinterInfo.class);
         if(attr == null) {
             return null;

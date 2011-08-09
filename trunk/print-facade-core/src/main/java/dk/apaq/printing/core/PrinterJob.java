@@ -173,7 +173,6 @@ public class PrinterJob {
     public void render(Graphics2D gfx, int pageNumber) {
         ensurePageableExists();
         doRenderPageable(gfx, copies, pageable);
-        
     }
 
     public static PrinterJobBuilder getBuilder(Printer printer, String text) {
