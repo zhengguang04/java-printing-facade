@@ -39,6 +39,13 @@ public class MarginTest extends TestCase {
         assertEquals(40.0, instance.getBottom());
 
     }
+    
+    public void testParse() {
+        Margin instance = new Margin(10, 20, 30, 40);
+        Margin instance2 = Margin.fromString(instance.toString());
+        
+        assertEquals(instance, instance2);
+    }
 
 
 }
