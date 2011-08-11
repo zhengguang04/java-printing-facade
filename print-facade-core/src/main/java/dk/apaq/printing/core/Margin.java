@@ -27,10 +27,10 @@ public class Margin {
         this.bottom = bottom;
 
         StringBuilder builder = new StringBuilder();
-        builder.append("Left: ").append(NUMBER_FORMAT.format(left)).append("mm, ");
-        builder.append("Top: ").append(NUMBER_FORMAT.format(top)).append("mm, ");
-        builder.append("Right: ").append(NUMBER_FORMAT.format(right)).append("mm, ");
-        builder.append("Bottom: ").append(NUMBER_FORMAT.format(bottom)).append("mm");
+        builder.append(NUMBER_FORMAT.format(left)).append("mm, ");
+        builder.append(NUMBER_FORMAT.format(top)).append("mm, ");
+        builder.append(NUMBER_FORMAT.format(right)).append("mm, ");
+        builder.append(NUMBER_FORMAT.format(bottom)).append("mm");
         displayString = builder.toString();
     }
 
