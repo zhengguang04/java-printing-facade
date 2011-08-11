@@ -4,7 +4,7 @@
     <groupId>dk.apaq.printing</groupId>
     <artifactId>printing-facade</artifactId>
     <packaging>pom</packaging>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.2</version>
     <name>printing-facade</name>
     <description>A Facade API that serves as a simple facade or abstraction for various printing frameworks.</description>
     <url>http://apaq.dk/projects/printing</url>
@@ -14,9 +14,9 @@
     </issueManagement>
     <inceptionYear>2011</inceptionYear>
     <scm>
-        <connection>scm:svn:https://java-printing-facade.googlecode.com/svn/trunk</connection>
-        <developerConnection>scm:svn:https://java-printing-facade.googlecode.com/svn/trunk</developerConnection>
-        <url>http://code.google.com/p/java-printing-facade/source/browse/trunk</url>
+        <connection>scm:svn:https://java-printing-facade.googlecode.com/svn/tags/printing-facade-1.2</connection>
+        <developerConnection>scm:svn:https://java-printing-facade.googlecode.com/svn/tags/printing-facade-1.2</developerConnection>
+        <url>http://code.google.com/p/java-printing-facade/source/browse/tags/printing-facade-1.2</url>
     </scm>
 
     <dependencies>
