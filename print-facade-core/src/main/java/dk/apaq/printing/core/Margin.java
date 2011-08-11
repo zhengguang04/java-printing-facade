@@ -35,7 +35,7 @@ public class Margin {
     }
 
     /**
-     * Printable area distace from the bottom of the paper in millimeters
+     * Printable area distance from the bottom of the paper in millimeters
      */
     public double getBottom() {
         return bottom;

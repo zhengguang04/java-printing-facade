@@ -61,14 +61,12 @@ public class RemoteClientPlugin extends AbstractPrinterManagerPlugin {
 
     @Override
     public void print(PrinterJob job) {
-        //Build zip
-        //Use custom transport to client
-        //transporter.transportPrinterJob(zipdata);
+        transporter.transportPrinterJob(buildZip(job));
     }
 
     public void setPrinters(List<RemoteClientPrinter> clientPrinters) {
         this.printers.clear();
-        this.printers.addAll(printers);
+        this.printers.addAll(clientPrinters);
         fireChangeEvent();
     }
 
