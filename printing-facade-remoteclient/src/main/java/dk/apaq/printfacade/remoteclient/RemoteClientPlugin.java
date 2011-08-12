@@ -7,23 +7,18 @@ import dk.apaq.printing.core.PrinterException;
 import dk.apaq.printing.core.PrinterJob;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.awt.print.Printable;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.text.AttributedCharacterIterator.Attribute;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.imageio.ImageIO;
-import javax.print.PrintException;
-import javax.print.attribute.PrintRequestAttributeSet;
 
 /**
  *
@@ -61,14 +56,12 @@ public class RemoteClientPlugin extends AbstractPrinterManagerPlugin {
 
     @Override
     public void print(PrinterJob job) {
-        //Build zip
-        //Use custom transport to client
-        //transporter.transportPrinterJob(zipdata);
+        transporter.transportPrinterJob(buildZip(job));
     }
 
     public void setPrinters(List<RemoteClientPrinter> clientPrinters) {
         this.printers.clear();
-        this.printers.addAll(printers);
+        this.printers.addAll(clientPrinters);
         fireChangeEvent();
     }
 
@@ -85,7 +78,7 @@ public class RemoteClientPlugin extends AbstractPrinterManagerPlugin {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             ZipOutputStream zout = new ZipOutputStream(os);
 
-            ZipEntry jobinfoentry = new ZipEntry("job.json");
+            ZipEntry jobinfoentry = new ZipEntry("job.properties");
             zout.putNextEntry(jobinfoentry);
             writeJobInfo(job, zout);
             zout.closeEntry();
