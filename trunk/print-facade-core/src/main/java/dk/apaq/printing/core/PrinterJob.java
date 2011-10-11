@@ -20,7 +20,7 @@ public class PrinterJob {
     private final Printer printer;
     private Pageable pageable;
     private final Object data;
-    private int copies;
+    private int copies = 1;
     private Paper paper = Paper.A4;
     private Margin margin = new Margin(0, 0, 0, 0);
     private Orientation orientation = Orientation.Portrait;
