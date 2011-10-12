@@ -17,6 +17,8 @@ import java.awt.print.PrinterException;
  */
 public class PrinterJob {
 
+    private static int jobCount=0;
+    
     private final Printer printer;
     private Pageable pageable;
     private final Object data;
@@ -25,6 +27,7 @@ public class PrinterJob {
     private Margin margin = new Margin(0, 0, 0, 0);
     private Orientation orientation = Orientation.Portrait;
     private boolean color;
+    private String name = "PrinterJob-" + jobCount++;
 
     private static class SimplePageable implements Pageable {
 
@@ -104,6 +107,11 @@ public class PrinterJob {
             this.job = job;
         }
 
+        public PrinterJobBuilder setName(String name) {
+            job.name = name;
+            return this;
+        }
+        
         public PrinterJobBuilder setColorEnabled(boolean enabled) {
             job.color = enabled;
             return this;
@@ -141,6 +149,10 @@ public class PrinterJob {
         this.data = data;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public int getCopies() {
         return copies;
     }
@@ -172,7 +184,7 @@ public class PrinterJob {
 
     public void render(Graphics2D gfx, int pageNumber) {
         ensurePageableExists();
-        doRenderPageable(gfx, copies, pageable);
+        doRenderPageable(gfx, pageNumber, pageable);
     }
 
     public static PrinterJobBuilder getBuilder(Printer printer, String text) {
