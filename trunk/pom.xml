@@ -32,7 +32,8 @@
         <module>print-facade-core</module>
         <module>printing-facade-basic</module>
         <module>printing-facade-remoteclient</module>
-    </modules>
+    <module>printing-facade-googlecloud</module>
+  </modules>
 
     <distributionManagement>
         <snapshotRepository>
