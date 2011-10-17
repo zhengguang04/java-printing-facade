@@ -34,10 +34,10 @@ public class GoogleCloudPrintPluginTest {
         String clientid = "700939733854.apps.googleusercontent.com";
         String clientSecret = "TwM1ADz1REuRfd5muU89Rejv";
         
-        GoogleCloudPrintPlugin.AccessTokenInfo info = 
-                new GoogleCloudPrintPlugin.AccessTokenInfo("ya29.AHES6ZQAhEIBJneie8UmW7FVBdsa2B0-Di2qtMxEcRRC8zU", 
-                                                          3600, "Bearer", "1/nRk3wSocUnHMUSB1KkbsC-zZyExAi34iJKm_uG6fdxE");
-        cloudPrintPlugin = new GoogleCloudPrintPlugin(info, new Date());
+        //GoogleCloudPrintPlugin.AccessTokenInfo info = 
+        //        new GoogleCloudPrintPlugin.AccessTokenInfo("ya29.AHES6ZQAhEIBJneie8UmW7FVBdsa2B0-Di2qtMxEcRRC8zU", 
+        //                                                  3600, "Bearer", "1/nRk3wSocUnHMUSB1KkbsC-zZyExAi34iJKm_uG6fdxE");
+        cloudPrintPlugin = new GoogleCloudPrintPlugin(new ClientLoginAuthorizer("user@gmail.com", "password", "test"), "test");
 //        cloudPrintPlugin = new GoogleCloudPrintPlugin(clientid, clientSecret, code);
     }
 
@@ -49,26 +49,24 @@ public class GoogleCloudPrintPluginTest {
     /**
      * Test of getDefaultPrinter method, of class GoogleCloudPrintPlugin.
      */
-    @Test
+    /*@Test
     public void testGetDefaultPrinter() {
         System.out.println("getDefaultPrinter");
         Printer result = cloudPrintPlugin.getDefaultPrinter();
         //assertEquals(expResult, result);
-    }
+    }*/
+    
     /**
      * Test of getPrinters method, of class GoogleCloudPrintPlugin.
      */
-    /*@Test
+    @Test
     public void testGetPrinters() {
     System.out.println("getPrinters");
-    GoogleCloudPrintPlugin instance = null;
-    List expResult = null;
-    List result = instance.getPrinters();
-    assertEquals(expResult, result);
-    // TODO review the generated test code and remove the default call to fail.
-    fail("The test case is a prototype.");
+    List result = cloudPrintPlugin.getPrinters();
+    assertNotNull(result);
+    
     }
-     */
+     
     /**
      * Test of print method, of class GoogleCloudPrintPlugin.
      */
