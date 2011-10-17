@@ -37,7 +37,7 @@ public class GoogleCloudPrintPluginTest {
         //GoogleCloudPrintPlugin.AccessTokenInfo info = 
         //        new GoogleCloudPrintPlugin.AccessTokenInfo("ya29.AHES6ZQAhEIBJneie8UmW7FVBdsa2B0-Di2qtMxEcRRC8zU", 
         //                                                  3600, "Bearer", "1/nRk3wSocUnHMUSB1KkbsC-zZyExAi34iJKm_uG6fdxE");
-        cloudPrintPlugin = new GoogleCloudPrintPlugin(new ClientLoginAuthorizer("user@gmail.com", "password", "test"), "test");
+        cloudPrintPlugin = new GoogleCloudPrintPlugin(new ClientLoginAuthorizer("test"), "test");
 //        cloudPrintPlugin = new GoogleCloudPrintPlugin(clientid, clientSecret, code);
     }
 
@@ -60,10 +60,14 @@ public class GoogleCloudPrintPluginTest {
      * Test of getPrinters method, of class GoogleCloudPrintPlugin.
      */
     @Test
-    public void testGetPrinters() {
+    public void testGetPrinters() throws InterruptedException {
     System.out.println("getPrinters");
     List result = cloudPrintPlugin.getPrinters();
-    assertNotNull(result);
+    
+    Thread.sleep(20000);
+    result = cloudPrintPlugin.getPrinters();
+    
+    assertFalse(result.isEmpty());
     
     }
      

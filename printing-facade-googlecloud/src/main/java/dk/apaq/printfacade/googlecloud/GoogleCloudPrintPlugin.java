@@ -8,13 +8,11 @@ import dk.apaq.printing.core.Printer;
 import dk.apaq.printing.core.PrinterException;
 import dk.apaq.printing.core.PrinterJob;
 import dk.apaq.printing.core.PrinterState;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,11 +35,30 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
     private Gson gson = new Gson();
     private final Authorizer authorizer;
     private final String clientName;
-    private List<Printer> printers;
+    private List<Printer> printers = null;
 
     public interface Authorizer {
 
-        String authorize();
+        void authorize(AuthorizeCallback callback);
+    }
+    
+    public interface AuthorizeCallback {
+    
+        public void onAuthorized(String authorizationCode);
+    }
+    
+    private class AuthorizeCallImpl implements AuthorizeCallback {
+        private GoogleCloudPrintPlugin instance;
+
+        public AuthorizeCallImpl(GoogleCloudPrintPlugin instance) {
+            this.instance = instance;
+        }
+
+        public void onAuthorized(String authorizationCode) {
+            instance.retrieveCloudPrinters(authorizationCode);
+        }
+        
+        
     }
 
     public class CloudPrinters {
@@ -215,13 +232,8 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
 
     public List<Printer> getPrinters() {
         if(printers==null) {
-            try {
-                List<Printer> tmpList = new ArrayList<Printer>();
-                tmpList.addAll(getCloudPrinters().getPrinters());
-                printers = tmpList;
-            } catch (IOException ex) {
-                throw new PrinterException(ex);
-            }
+            printers = new ArrayList<Printer>();
+            authorizer.authorize(new AuthorizeCallImpl(this));
         }
         return printers;
     }
@@ -230,11 +242,10 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    private CloudPrinters getCloudPrinters() throws IOException {
+    private void retrieveCloudPrinters(String authCode) {
 
-        String authCode = authorizer.authorize();
-        if (authCode == null) {
-            return new CloudPrinters(false);
+        if(authCode==null) {
+            throw new PrinterException("authcode was null.");
         }
 
         try {
@@ -247,9 +258,11 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
             CloudPrinters cplist = gson.fromJson(new InputStreamReader(con.getInputStream()), CloudPrinters.class);
 
 
-            return cplist;
+            printers = new ArrayList<Printer>();
+            printers.addAll(cplist.getPrinters());
+            fireChangeEvent();
         } catch (Exception ex) {
-            return null;
+            throw new PrinterException(ex);
         }
 
     }
