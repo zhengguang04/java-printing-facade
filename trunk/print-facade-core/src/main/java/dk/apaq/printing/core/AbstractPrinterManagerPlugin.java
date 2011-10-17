@@ -11,10 +11,12 @@ public abstract class AbstractPrinterManagerPlugin implements PrinterManagerPlug
 
     private List<PrinterListChangeListener> listeners = new ArrayList<PrinterListChangeListener>();
 
+    @Override
     public void addListener(PrinterListChangeListener listener) {
         listeners.add(listener);
     }
 
+    @Override
     public void removeListener(PrinterListChangeListener listener) {
         listeners.remove(listener);
     }
