@@ -67,8 +67,8 @@ public class OAuth2Authorizer implements GoogleCloudPrintPlugin.Authorizer {
     }
     
     
-    public String authorize() {
-        return getAccessToken();
+    public void authorize(GoogleCloudPrintPlugin.AuthorizeCallback callback) {
+        callback.onAuthorized(getAccessToken());
     }
     
     private String getAccessToken() throws PrinterException {
