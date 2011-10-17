@@ -2,6 +2,7 @@ package dk.apaq.printfacade.googlecloud;
 
 import dk.apaq.printing.core.Printer;
 import dk.apaq.printing.core.PrinterJob;
+import java.util.Date;
 import java.util.List;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -29,10 +30,15 @@ public class GoogleCloudPrintPluginTest {
 
     @Before
     public void setUp() {
-        String code = "4/s0xkDRwfdiZR9rthiZdDCqKvekjP";
+        String code = "4/BAGrNuYZWXdQO5XK9cH74NOhS6JC";
         String clientid = "700939733854.apps.googleusercontent.com";
         String clientSecret = "TwM1ADz1REuRfd5muU89Rejv";
-        cloudPrintPlugin = new GoogleCloudPrintPlugin(clientid, clientSecret, code);
+        
+        GoogleCloudPrintPlugin.AccessTokenInfo info = 
+                new GoogleCloudPrintPlugin.AccessTokenInfo("ya29.AHES6ZQAhEIBJneie8UmW7FVBdsa2B0-Di2qtMxEcRRC8zU", 
+                                                          3600, "Bearer", "1/nRk3wSocUnHMUSB1KkbsC-zZyExAi34iJKm_uG6fdxE");
+        cloudPrintPlugin = new GoogleCloudPrintPlugin(info, new Date());
+//        cloudPrintPlugin = new GoogleCloudPrintPlugin(clientid, clientSecret, code);
     }
 
     @After

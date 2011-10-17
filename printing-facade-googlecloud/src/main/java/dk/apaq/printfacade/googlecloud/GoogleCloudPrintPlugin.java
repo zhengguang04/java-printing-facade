@@ -39,14 +39,47 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
     private Date lastTokenUpdate = null;
     private Gson gson = new Gson();
 
-    private class AccessTokenInfo {
+    protected static class AccessTokenInfo {
 
         private String accessToken;
         private int expiresIn;
         private String tokenType;
         private String refresh_token;
+
+        public AccessTokenInfo(String accessToken, int expiresIn, String tokenType, String refresh_token) {
+            this.accessToken = accessToken;
+            this.expiresIn = expiresIn;
+            this.tokenType = tokenType;
+            this.refresh_token = refresh_token;
+        }
+
+        public String getAccessToken() {
+            return accessToken;
+        }
+
+        public int getExpiresIn() {
+            return expiresIn;
+        }
+
+        public String getRefresh_token() {
+            return refresh_token;
+        }
+
+        public String getTokenType() {
+            return tokenType;
+        }
+
+        
     }
 
+    protected GoogleCloudPrintPlugin(AccessTokenInfo accessTokenInfo, Date lastTokenUpdate) {
+        this.clientId = null;
+        this.clientSecret = null;
+        this.authorizationCode = null;
+        this.lastTokenUpdate = lastTokenUpdate;
+        this.accessTokenInfo = accessTokenInfo;
+    }
+    
     public GoogleCloudPrintPlugin(String clientId, String clientSecret, String authorizationCode) {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
@@ -89,7 +122,7 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
                 writer.write("&redirect_uri=http://localhost/oauth2callback");
             } else {
                 writer.write("&grant_type=refresh_token");
-                writer.write("&refresh_token="+accessTokenInfo.accessToken);
+                writer.write("&refresh_token="+accessTokenInfo.refresh_token);
             }
             writer.close();
 
