@@ -2,16 +2,19 @@ package dk.apaq.printfacade.googlecloud;
 
 import com.google.gson.Gson;
 import dk.apaq.printing.core.AbstractPrinterManagerPlugin;
+import dk.apaq.printing.core.Margin;
+import dk.apaq.printing.core.Paper;
 import dk.apaq.printing.core.Printer;
 import dk.apaq.printing.core.PrinterException;
 import dk.apaq.printing.core.PrinterJob;
+import dk.apaq.printing.core.PrinterState;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +25,6 @@ import org.slf4j.LoggerFactory;
 public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
 
     private static final Logger LOG = LoggerFactory.getLogger(GoogleCloudPrintPlugin.class);
-    private static final String tokenUrl = "https://accounts.google.com/o/oauth2/token";
     /*
      * http://code.google.com/p/google-api-java-client/wiki/OAuth2Draft10#Sample_Program
      * http://code.google.com/apis/cloudprint/docs/appInterfaces.html
@@ -32,122 +34,224 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
      * clientid = 700939733854.apps.googleusercontent.com
      * clientSecret = yygJ1QE3yRsNieDoZKOKBUgl
      */
-    private final String clientId;
-    private final String clientSecret;
-    private final String authorizationCode;
-    private AccessTokenInfo accessTokenInfo;
-    private Date lastTokenUpdate = null;
     private Gson gson = new Gson();
+    private final Authorizer authorizer;
+    private final String clientName;
+    private List<Printer> printers;
 
-    protected static class AccessTokenInfo {
+    public interface Authorizer {
 
-        private String accessToken;
-        private int expiresIn;
-        private String tokenType;
-        private String refresh_token;
-
-        public AccessTokenInfo(String accessToken, int expiresIn, String tokenType, String refresh_token) {
-            this.accessToken = accessToken;
-            this.expiresIn = expiresIn;
-            this.tokenType = tokenType;
-            this.refresh_token = refresh_token;
-        }
-
-        public String getAccessToken() {
-            return accessToken;
-        }
-
-        public int getExpiresIn() {
-            return expiresIn;
-        }
-
-        public String getRefresh_token() {
-            return refresh_token;
-        }
-
-        public String getTokenType() {
-            return tokenType;
-        }
-
-        
+        String authorize();
     }
 
-    protected GoogleCloudPrintPlugin(AccessTokenInfo accessTokenInfo, Date lastTokenUpdate) {
-        this.clientId = null;
-        this.clientSecret = null;
-        this.authorizationCode = null;
-        this.lastTokenUpdate = lastTokenUpdate;
-        this.accessTokenInfo = accessTokenInfo;
+    public class CloudPrinters {
+
+        private boolean success;
+        private List<CloudPrinter> printers;
+
+        public CloudPrinters(boolean success) {
+            this.success = success;
+            this.printers = new ArrayList<CloudPrinter>();
+        }
+
+        public CloudPrinters(boolean success, List<CloudPrinter> printers) {
+            this.success = success;
+            this.printers = printers;
+        }
+
+        public List<CloudPrinter> getPrinters() {
+            return printers;
+        }
+
+        public void setPrinters(List<CloudPrinter> printers) {
+            this.printers = printers;
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public void setSuccess(boolean success) {
+            this.success = success;
+        }
     }
-    
-    public GoogleCloudPrintPlugin(String clientId, String clientSecret, String authorizationCode) {
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
-        this.authorizationCode = authorizationCode;
+
+    public class CloudPrinter implements Printer {
+
+        private String id;
+        private String name;
+        private String description;
+        private String proxy;
+        private String status;
+        private String capsHash;
+        private String createTime;
+        private String updateTime;
+        private String accessTime;
+        private boolean confirmed;
+        private int numberOfDocuments;
+        private int numberOfPages;
+
+        public String getAccessTime() {
+            return accessTime;
+        }
+
+        public void setAccessTime(String accessTime) {
+            this.accessTime = accessTime;
+        }
+
+        public String getCapsHash() {
+            return capsHash;
+        }
+
+        public void setCapsHash(String capsHash) {
+            this.capsHash = capsHash;
+        }
+
+        public boolean isConfirmed() {
+            return confirmed;
+        }
+
+        public void setConfirmed(boolean confirmed) {
+            this.confirmed = confirmed;
+        }
+
+        public String getCreateTime() {
+            return createTime;
+        }
+
+        public void setCreateTime(String createTime) {
+            this.createTime = createTime;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getNumberOfDocuments() {
+            return numberOfDocuments;
+        }
+
+        public void setNumberOfDocuments(int numberOfDocuments) {
+            this.numberOfDocuments = numberOfDocuments;
+        }
+
+        public int getNumberOfPages() {
+            return numberOfPages;
+        }
+
+        public void setNumberOfPages(int numberOfPages) {
+            this.numberOfPages = numberOfPages;
+        }
+
+        public String getProxy() {
+            return proxy;
+        }
+
+        public void setProxy(String proxy) {
+            this.proxy = proxy;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public String getUpdateTime() {
+            return updateTime;
+        }
+
+        public void setUpdateTime(String updateTime) {
+            this.updateTime = updateTime;
+        }
+
+        public boolean supportsColor() {
+            return true;
+        }
+
+        public Paper[] getSupportedPapers() {
+            return new Paper[]{Paper.A4};
+        }
+
+        public Margin getPhysicalMargin(Paper paperSize) {
+            return new Margin(0, 0, 0, 0);
+        }
+
+        public PrinterState getState() {
+            return PrinterState.Idle;
+        }
+    }
+
+    public GoogleCloudPrintPlugin(Authorizer authorizer, String clientName) {
+        this.authorizer = authorizer;
+        this.clientName = clientName;
     }
 
     public Printer getDefaultPrinter() {
-        String token = getAccessToken();
         return null;
     }
 
     public List<Printer> getPrinters() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if(printers==null) {
+            try {
+                List<Printer> tmpList = new ArrayList<Printer>();
+                tmpList.addAll(getCloudPrinters().getPrinters());
+                printers = tmpList;
+            } catch (IOException ex) {
+                throw new PrinterException(ex);
+            }
+        }
+        return printers;
     }
 
     public void print(PrinterJob job) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    private String getAccessToken() throws PrinterException {
-        
-        if(!isTokenExpired()) {
-            return accessTokenInfo.accessToken;
+    private CloudPrinters getCloudPrinters() throws IOException {
+
+        String authCode = authorizer.authorize();
+        if (authCode == null) {
+            return new CloudPrinters(false);
         }
-        
-        HttpURLConnection con = null;
+
         try {
-            URL url = new URL(tokenUrl);
-            con = (HttpURLConnection) url.openConnection();
-            con.setDoOutput(true);
-            //con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            URL url = new URL("https://www.google.com/cloudprint/search?output=json");
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
-            OutputStreamWriter writer = new OutputStreamWriter(con.getOutputStream());
-            writer.write("code=" + authorizationCode);
-            writer.write("&client_id=" + clientId);
-            writer.write("&client_secret=" + clientSecret);
-            
-            if(accessTokenInfo == null) {
-                writer.write("&grant_type=authorization_code");
-                writer.write("&redirect_uri=http://localhost/oauth2callback");
-            } else {
-                writer.write("&grant_type=refresh_token");
-                writer.write("&refresh_token="+accessTokenInfo.refresh_token);
-            }
-            writer.close();
+            con.addRequestProperty("X-CloudPrint-Proxy", clientName);
+            con.addRequestProperty("Authorization", "GoogleLogin auth=" + authCode);
 
-            accessTokenInfo = gson.fromJson(new InputStreamReader(con.getInputStream()), AccessTokenInfo.class);
+            CloudPrinters cplist = gson.fromJson(new InputStreamReader(con.getInputStream()), CloudPrinters.class);
 
-            LOG.info("Got new token from Google: " + accessTokenInfo.accessToken);
-            return accessTokenInfo.accessToken;
-        } catch (IOException ex) {
-            String message = "Could not retrieve access token from Google. ";
-            if (con instanceof HttpURLConnection) {
-                try {
-                    message += " " + con.getResponseMessage();
-                } catch (IOException ex1) {
-                }
-            }
-            throw new PrinterException(message, ex);
+
+            return cplist;
+        } catch (Exception ex) {
+            return null;
         }
 
     }
-
-    private boolean isTokenExpired() {
-        if (lastTokenUpdate == null || (System.currentTimeMillis() - lastTokenUpdate.getTime()) >= (accessTokenInfo.expiresIn * 1000)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+    
 }
