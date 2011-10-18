@@ -8,15 +8,19 @@ import dk.apaq.printing.core.Printer;
 import dk.apaq.printing.core.PrinterException;
 import dk.apaq.printing.core.PrinterJob;
 import dk.apaq.printing.core.PrinterState;
+import dk.apaq.printing.core.util.PdfUtil;
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.misc.BASE64Encoder;
 
 /**
  *
@@ -34,7 +38,8 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
      * clientid = 700939733854.apps.googleusercontent.com
      * clientSecret = yygJ1QE3yRsNieDoZKOKBUgl
      */
-    private Gson gson = new Gson();
+    private final Gson gson = new Gson();
+    private final Base64 base64 = new Base64(0);
     private final Authorizer authorizer;
     private final String clientName;
     private List<Printer> printers = null;
@@ -58,7 +63,7 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
         }
 
         public void onAuthorized(String authorizationCode) {
-            instance.setAuthorizationCode(authCode);
+            instance.setAuthorizationCode(authorizationCode);
         }
         
         
@@ -279,36 +284,43 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
 
     public void print(PrinterJob job) {
         try {
+            String charset = "UTF-8";
                 if(authCode == null) {
                     throw new PrinterException("authcode was null");
                 }
-                URL url = new URL("http://www.google.com/cloudprint/submit?output=json");
+                URL url = new URL("https://www.google.com/cloudprint/submit?output=json");
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setDoOutput(true);
                 con.setRequestMethod("POST");
 
-                BASE64Encoder b64Encoder = new BASE64Encoder();
+                byte[] docData = PdfUtil.buildPdf(job);
+                OutputStream fos = new FileOutputStream("test.pdf");
+                fos.write(docData);
+                fos.flush();
+                fos.close();
+                
                 String queryString =
-                        "printerid=" + URLEncoder.encode(job.getPrinter().getId(), "utf-8")
-                        + "&capabilities=" + URLEncoder.encode("", "utf-8")
-                        + "&contentType=" + URLEncoder.encode("application/pdf", "utf-8")
-                        + "&title=" + URLEncoder.encode(job.getName(), "utf-8")
-                        + "&content=" + URLEncoder.encode(null/*Convert.ToBase64String(document)*/, "utf-8");
+                        "printerid=" + URLEncoder.encode(job.getPrinter().getId(), charset)
+                        + "&capabilities=" + URLEncoder.encode("", charset)
+                        + "&contentType=" + URLEncoder.encode("application/pdf", charset)
+                        + "&title=" + URLEncoder.encode(job.getName(), charset)
+                        + "&content=" + URLEncoder.encode(base64.encodeToString(docData), charset);
 
-                byte[] data = null; //new ASCIIEncoding().GetBytes(queryString);
+                byte[] data = queryString.getBytes(charset);
+                
+                con.setRequestProperty("X-CloudPrint-Proxy", this.clientName);
+                con.setRequestProperty("Authorization", "GoogleLogin auth=" + this.authCode);
 
-                con.addRequestProperty("X-CloudPrint-Proxy", this.clientName);
-                con.addRequestProperty("Authorization", "GoogleLogin auth=" + this.authCode);
-
-                con.addRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                con.setRequestProperty("Accept-Charset", charset);
                 con.addRequestProperty("Content-Length", Integer.toString(data.length));
 
-                /*Stream stream = request.GetRequestStream();
-                stream.Write(data, 0, data.Length);
-                stream.Close();*/
-
+                OutputStream os = con.getOutputStream();
+                os.write(data);
+                os.flush();
+                os.close();
+                
                 // Get response
-                Gson gson = new Gson();
                 CloudPrintJobStatus printJobStatus = gson.fromJson(new InputStreamReader(con.getInputStream()), CloudPrintJobStatus.class);
 
                 if(!printJobStatus.isSuccess()) {
