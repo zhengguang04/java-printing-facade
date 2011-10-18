@@ -11,6 +11,7 @@ import dk.apaq.printing.core.PrinterState;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -36,6 +37,7 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
     private final Authorizer authorizer;
     private final String clientName;
     private List<Printer> printers = null;
+    private String authCode;
 
     public interface Authorizer {
 
@@ -55,11 +57,47 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
         }
 
         public void onAuthorized(String authorizationCode) {
-            instance.retrieveCloudPrinters(authorizationCode);
+            instance.setAuthorizationCode(authCode);
         }
         
         
     }
+    
+    public class CloudPrintJobStatus {
+
+        private boolean success;
+        private String message;
+
+        public CloudPrintJobStatus(boolean success) {
+            this.success = success;
+            
+        }
+
+        public CloudPrintJobStatus(boolean success, String message) {
+            this.success = success;
+            this.message = message;
+        }
+        
+        
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public void setSuccess(boolean success) {
+            this.success = success;
+        }
+        
+        
+    }
+
 
     public class CloudPrinters {
 
@@ -239,10 +277,52 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
     }
 
     public void print(PrinterJob job) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        try {
+                if(authCode == null) {
+                    throw new PrinterException("authcode was null");
+                }
+                URL url = new URL("http://www.google.com/cloudprint/submit?output=json");
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setDoOutput(true);
+                con.setRequestMethod("POST");
+
+                String queryString =
+                        "printerid=" + URLEncoder.encode(job.getPrinter().getId())
+                        + "&capabilities=" + URLEncoder.encode("")
+                        + "&contentType=" + URLEncoder.encode("application/pdf")
+                        + "&title=" + URLEncoder.encode(job.getName())
+                        + "&content=" + URLEncoder.encode(null/*Convert.ToBase64String(document)*/);
+
+                byte[] data = null; //new ASCIIEncoding().GetBytes(queryString);
+
+                con.addRequestProperty("X-CloudPrint-Proxy", this.clientName);
+                con.addRequestProperty("Authorization", "GoogleLogin auth=" + this.authCode);
+
+                con.addRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                con.addRequestProperty("Content-Length", Integer.toString(data.length));
+
+                /*Stream stream = request.GetRequestStream();
+                stream.Write(data, 0, data.Length);
+                stream.Close();*/
+
+                // Get response
+                Gson gson = new Gson();
+                CloudPrintJobStatus printJobStatus = gson.fromJson(new InputStreamReader(con.getInputStream()), CloudPrintJobStatus.class);
+
+                if(!printJobStatus.isSuccess()) {
+                    throw new PrinterException(printJobStatus.getMessage());
+                }
+            } catch (Exception ex) {
+                throw new PrinterException(ex);
+            }
     }
 
-    private void retrieveCloudPrinters(String authCode) {
+    public void setAuthorizationCode(String authCode) {
+        this.authCode = authCode;
+        this.retrieveCloudPrinters();
+    }
+    
+    private void retrieveCloudPrinters() {
 
         if(authCode==null) {
             throw new PrinterException("authcode was null.");
