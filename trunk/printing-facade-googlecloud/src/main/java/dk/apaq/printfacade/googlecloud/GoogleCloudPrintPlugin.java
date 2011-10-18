@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.misc.BASE64Encoder;
 
 /**
  *
@@ -286,12 +287,13 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
                 con.setDoOutput(true);
                 con.setRequestMethod("POST");
 
+                BASE64Encoder b64Encoder = new BASE64Encoder();
                 String queryString =
-                        "printerid=" + URLEncoder.encode(job.getPrinter().getId())
-                        + "&capabilities=" + URLEncoder.encode("")
-                        + "&contentType=" + URLEncoder.encode("application/pdf")
-                        + "&title=" + URLEncoder.encode(job.getName())
-                        + "&content=" + URLEncoder.encode(null/*Convert.ToBase64String(document)*/);
+                        "printerid=" + URLEncoder.encode(job.getPrinter().getId(), "utf-8")
+                        + "&capabilities=" + URLEncoder.encode("", "utf-8")
+                        + "&contentType=" + URLEncoder.encode("application/pdf", "utf-8")
+                        + "&title=" + URLEncoder.encode(job.getName(), "utf-8")
+                        + "&content=" + URLEncoder.encode(null/*Convert.ToBase64String(document)*/, "utf-8");
 
                 byte[] data = null; //new ASCIIEncoding().GetBytes(queryString);
 
