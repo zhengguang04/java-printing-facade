@@ -2,6 +2,10 @@ package dk.apaq.printfacade.googlecloud;
 
 import dk.apaq.printing.core.Printer;
 import dk.apaq.printing.core.PrinterJob;
+import java.awt.Graphics;
+import java.awt.print.PageFormat;
+import java.awt.print.Printable;
+import java.awt.print.PrinterException;
 import java.util.Date;
 import java.util.List;
 import org.junit.After;
@@ -33,12 +37,9 @@ public class GoogleCloudPrintPluginTest {
         String code = "4/BAGrNuYZWXdQO5XK9cH74NOhS6JC";
         String clientid = "700939733854.apps.googleusercontent.com";
         String clientSecret = "TwM1ADz1REuRfd5muU89Rejv";
-        
-        //GoogleCloudPrintPlugin.AccessTokenInfo info = 
-        //        new GoogleCloudPrintPlugin.AccessTokenInfo("ya29.AHES6ZQAhEIBJneie8UmW7FVBdsa2B0-Di2qtMxEcRRC8zU", 
-        //                                                  3600, "Bearer", "1/nRk3wSocUnHMUSB1KkbsC-zZyExAi34iJKm_uG6fdxE");
-        cloudPrintPlugin = new GoogleCloudPrintPlugin(new ClientLoginAuthorizer("test"), "test");
-//        cloudPrintPlugin = new GoogleCloudPrintPlugin(clientid, clientSecret, code);
+
+        cloudPrintPlugin = new GoogleCloudPrintPlugin(new ClientLoginAuthorizer("xxxxxxxxxxx", "xxxxxxxxxxxxxxxx", "test"), "test");
+
     }
 
     @After
@@ -51,36 +52,53 @@ public class GoogleCloudPrintPluginTest {
      */
     /*@Test
     public void testGetDefaultPrinter() {
-        System.out.println("getDefaultPrinter");
-        Printer result = cloudPrintPlugin.getDefaultPrinter();
-        //assertEquals(expResult, result);
+    System.out.println("getDefaultPrinter");
+    Printer result = cloudPrintPlugin.getDefaultPrinter();
+    //assertEquals(expResult, result);
     }*/
-    
     /**
      * Test of getPrinters method, of class GoogleCloudPrintPlugin.
      */
     @Test
     public void testGetPrinters() throws InterruptedException {
-    System.out.println("getPrinters");
-    List result = cloudPrintPlugin.getPrinters();
-    
-    Thread.sleep(20000);
-    result = cloudPrintPlugin.getPrinters();
-    
-    assertFalse(result.isEmpty());
-    
+        System.out.println("getPrinters");
+        /*List result = cloudPrintPlugin.getPrinters();
+        
+        Thread.sleep(20000);
+        result = cloudPrintPlugin.getPrinters();
+        
+        assertFalse(result.isEmpty());
+         */
     }
-     
+
     /**
      * Test of print method, of class GoogleCloudPrintPlugin.
      */
-    /*@Test
+    @Test
     public void testPrint() {
-    System.out.println("print");
-    PrinterJob job = null;
-    GoogleCloudPrintPlugin instance = null;
-    instance.print(job);
-    // TODO review the generated test code and remove the default call to fail.
-    fail("The test case is a prototype.");
-    }*/
+        System.out.println("print");
+
+        Printer printer = null;
+        for (Printer current : cloudPrintPlugin.getPrinters()) {
+            if (current.getId().equals("__google__docs")) {
+                printer = current;
+                break;
+            }
+        }
+
+        PrinterJob job = PrinterJob.getBuilder(printer, new Printable() {
+
+            public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
+                if (pageIndex > 0) {
+                    return NO_SUCH_PAGE;
+                }
+
+                graphics.drawString("Hallo hallo", 100, 100);
+                return PAGE_EXISTS;
+            }
+        }).build();
+        
+        cloudPrintPlugin.print(job);
+
+    }
 }
