@@ -38,7 +38,7 @@ public class GoogleCloudPrintPluginTest {
         String clientid = "700939733854.apps.googleusercontent.com";
         String clientSecret = "TwM1ADz1REuRfd5muU89Rejv";
 
-        cloudPrintPlugin = new GoogleCloudPrintPlugin(new ClientLoginAuthorizer("xxxxxxxxxxx", "xxxxxxxxxxxxxxxx", "test"), "test");
+        cloudPrintPlugin = new GoogleCloudPrintPlugin(new ClientLoginAuthorizer("michael.krog@gmail.com", "joojoo2010", "test"), "test");
 
     }
 

@@ -9,16 +9,23 @@ import dk.apaq.printing.core.PrinterException;
 import dk.apaq.printing.core.PrinterJob;
 import dk.apaq.printing.core.PrinterState;
 import dk.apaq.printing.core.util.PdfUtil;
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.InputStreamBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,13 +56,14 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
 
         void authorize(AuthorizeCallback callback);
     }
-    
+
     public interface AuthorizeCallback {
-    
+
         public void onAuthorized(String authorizationCode);
     }
-    
+
     private class AuthorizeCallImpl implements AuthorizeCallback {
+
         private GoogleCloudPrintPlugin instance;
 
         public AuthorizeCallImpl(GoogleCloudPrintPlugin instance) {
@@ -65,10 +73,8 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
         public void onAuthorized(String authorizationCode) {
             instance.setAuthorizationCode(authorizationCode);
         }
-        
-        
     }
-    
+
     public class CloudPrintJobStatus {
 
         private boolean success;
@@ -76,15 +82,14 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
 
         public CloudPrintJobStatus(boolean success) {
             this.success = success;
-            
+
         }
 
         public CloudPrintJobStatus(boolean success, String message) {
             this.success = success;
             this.message = message;
         }
-        
-        
+
         public String getMessage() {
             return message;
         }
@@ -100,10 +105,7 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
         public void setSuccess(boolean success) {
             this.success = success;
         }
-        
-        
     }
-
 
     public class CloudPrinters {
 
@@ -275,7 +277,7 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
     }
 
     public List<Printer> getPrinters() {
-        if(printers==null) {
+        if (printers == null) {
             printers = new ArrayList<Printer>();
             authorizer.authorize(new AuthorizeCallImpl(this));
         }
@@ -284,61 +286,56 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
 
     public void print(PrinterJob job) {
         try {
-            String charset = "UTF-8";
-                if(authCode == null) {
-                    throw new PrinterException("authcode was null");
-                }
-                URL url = new URL("https://www.google.com/cloudprint/submit?output=json");
-                HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                con.setDoOutput(true);
-                con.setRequestMethod("POST");
-
-                byte[] docData = PdfUtil.buildPdf(job);
-                OutputStream fos = new FileOutputStream("test.pdf");
-                fos.write(docData);
-                fos.flush();
-                fos.close();
-                
-                String queryString =
-                        "printerid=" + URLEncoder.encode(job.getPrinter().getId(), charset)
-                        + "&capabilities=" + URLEncoder.encode("", charset)
-                        + "&contentType=" + URLEncoder.encode("application/pdf", charset)
-                        + "&title=" + URLEncoder.encode(job.getName(), charset)
-                        + "&content=" + URLEncoder.encode(base64.encodeToString(docData), charset);
-
-                byte[] data = queryString.getBytes(charset);
-                
-                con.setRequestProperty("X-CloudPrint-Proxy", this.clientName);
-                con.setRequestProperty("Authorization", "GoogleLogin auth=" + this.authCode);
-
-                con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                con.setRequestProperty("Accept-Charset", charset);
-                con.addRequestProperty("Content-Length", Integer.toString(data.length));
-
-                OutputStream os = con.getOutputStream();
-                os.write(data);
-                os.flush();
-                os.close();
-                
-                // Get response
-                CloudPrintJobStatus printJobStatus = gson.fromJson(new InputStreamReader(con.getInputStream()), CloudPrintJobStatus.class);
-
-                if(!printJobStatus.isSuccess()) {
-                    throw new PrinterException(printJobStatus.getMessage());
-                }
-            } catch (Exception ex) {
-                throw new PrinterException(ex);
+            if (authCode == null) {
+                throw new PrinterException("authcode was null");
             }
+            
+            byte[] docData = PdfUtil.buildPdf(job);
+            
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpPost httpPost = new HttpPost("https://www.google.com/cloudprint/submit?output=json");
+            
+            httpPost.setHeader("X-CloudPrint-Proxy", this.clientName);
+            httpPost.setHeader("Authorization", "GoogleLogin auth=" + this.authCode);
+            
+            InputStreamBody dataPart = new InputStreamBody(new ByteArrayInputStream(docData), "application/pdf", job.getName());
+            StringBody titlePart = new StringBody(job.getName());
+            StringBody typePart = new StringBody("application/pdf");
+            StringBody printerIdPart = new StringBody(job.getPrinter().getId());
+            StringBody capabilitiesPart = new StringBody("");
+            
+            MultipartEntity reqEntity = new MultipartEntity();
+            reqEntity.addPart("content", dataPart);
+            reqEntity.addPart("contentType", typePart);
+            reqEntity.addPart("title", titlePart);
+            reqEntity.addPart("printerid", printerIdPart);
+            reqEntity.addPart("capabilities", capabilitiesPart);
+            httpPost.setEntity(reqEntity);
+
+            HttpResponse response = httpclient.execute(httpPost);
+            
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            response.getEntity().writeTo(bos);
+            
+            // Get response
+            CloudPrintJobStatus printJobStatus = gson.fromJson(new InputStreamReader(response.getEntity().getContent()), CloudPrintJobStatus.class);
+
+            if (!printJobStatus.isSuccess()) {
+                throw new PrinterException(printJobStatus.getMessage());
+            }
+        } catch (Exception ex) {
+            throw new PrinterException(ex);
+        }
     }
 
     public void setAuthorizationCode(String authCode) {
         this.authCode = authCode;
         this.retrieveCloudPrinters();
     }
-    
+
     private void retrieveCloudPrinters() {
 
-        if(authCode==null) {
+        if (authCode == null) {
             throw new PrinterException("authcode was null.");
         }
 
@@ -360,5 +357,4 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
         }
 
     }
-    
 }
