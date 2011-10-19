@@ -307,9 +307,6 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
 
             HttpResponse response = httpclient.execute(httpPost);
             
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            response.getEntity().writeTo(bos);
-            
             // Get response
             CloudPrintJobStatus printJobStatus = gson.fromJson(new InputStreamReader(response.getEntity().getContent()), CloudPrintJobStatus.class);
 
