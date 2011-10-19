@@ -16,13 +16,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -41,12 +38,8 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
      * http://code.google.com/apis/cloudprint/docs/appInterfaces.html
      * http://code.google.com/apis/accounts/docs/OAuth2.html#SS
      * 
-     * code = 4/s0xkDRwfdiZR9rthiZdDCqKvekjP
-     * clientid = 700939733854.apps.googleusercontent.com
-     * clientSecret = yygJ1QE3yRsNieDoZKOKBUgl
      */
     private final Gson gson = new Gson();
-    private final Base64 base64 = new Base64(0);
     private final Authorizer authorizer;
     private final String clientName;
     private List<Printer> printers = null;
