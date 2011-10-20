@@ -12,6 +12,7 @@ import dk.apaq.printing.core.PrinterException;
 import dk.apaq.printing.core.PrinterJob;
 import java.awt.Graphics2D;
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 
 /**
  *
@@ -21,8 +22,7 @@ public class PdfUtil {
     
     public static final double MM_TO_DPI_SCALE = 2.8350168350168350168350168350168;
     
-    public static byte[] buildPdf(PrinterJob job) throws DocumentException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
+    public static void buildPdf(PrinterJob job, OutputStream os) throws DocumentException {
         Document doc = new Document(getPageSizeFromPaper(job.getPaper()));
         PdfWriter pdfWriter = PdfWriter.getInstance(doc, os);
         doc.open();
@@ -43,6 +43,11 @@ public class PdfUtil {
             }
         }
         doc.close();
+    }
+    
+    public static byte[] buildPdf(PrinterJob job) throws DocumentException {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        buildPdf(job, os);
         return os.toByteArray();
     }
     

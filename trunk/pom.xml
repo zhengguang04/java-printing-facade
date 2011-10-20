@@ -33,6 +33,7 @@
         <module>printing-facade-basic</module>
         <module>printing-facade-remoteclient</module>
     <module>printing-facade-googlecloud</module>
+    <module>printing-facade-pdf</module>
   </modules>
 
     <distributionManagement>
