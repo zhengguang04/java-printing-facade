@@ -223,6 +223,10 @@ public class PrinterJob {
             pageable = new SimplePageable((Printable) data,paper, margin, orientation);
             return;
         }
+        
+        if(data instanceof String) {
+            throw new UnsupportedOperationException("Printing text is not yet supported.");
+        }
 
     }
 
