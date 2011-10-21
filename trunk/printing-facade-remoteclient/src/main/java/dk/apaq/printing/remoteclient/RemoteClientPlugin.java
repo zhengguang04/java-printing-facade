@@ -1,25 +1,14 @@
 package dk.apaq.printing.remoteclient;
 
 import dk.apaq.printing.core.AbstractPrinterManagerPlugin;
-import dk.apaq.printing.core.Paper;
 import dk.apaq.printing.core.Printer;
 import dk.apaq.printing.core.PrinterException;
 import dk.apaq.printing.core.PrinterJob;
 import dk.apaq.printing.core.util.ImageUtil;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-import javax.imageio.ImageIO;
 
 /**
  *
@@ -78,6 +67,5 @@ public class RemoteClientPlugin extends AbstractPrinterManagerPlugin {
         }
 
     }
-
     
 }
