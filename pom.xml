@@ -34,6 +34,7 @@
         <module>printing-facade-remoteclient</module>
     <module>printing-facade-googlecloud</module>
     <module>printing-facade-pdf</module>
+    <module>printing-facade-image</module>
   </modules>
 
     <distributionManagement>
