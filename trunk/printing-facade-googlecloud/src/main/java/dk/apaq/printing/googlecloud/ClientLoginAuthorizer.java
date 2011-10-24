@@ -60,6 +60,11 @@ public class ClientLoginAuthorizer implements GoogleCloudPrintPlugin.Authorizer 
         });
         
     }
+
+    public String getAuthorizationPrefix() {
+        return "GoogleLogin auth=";
+    }
+    
     
     private void authorizeAndCallback(String username, String password, GoogleCloudPrintPlugin.AuthorizeCallback callback) {
         try {

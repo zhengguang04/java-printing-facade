@@ -47,6 +47,7 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
 
     public interface Authorizer {
 
+        String getAuthorizationPrefix();
         void authorize(AuthorizeCallback callback);
     }
 
@@ -289,7 +290,7 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
             HttpPost httpPost = new HttpPost("https://www.google.com/cloudprint/submit?output=json");
             
             httpPost.setHeader("X-CloudPrint-Proxy", this.clientName);
-            httpPost.setHeader("Authorization", "GoogleLogin auth=" + this.authCode);
+            httpPost.setHeader("Authorization", this.authorizer.getAuthorizationPrefix() + this.authCode);
             
             InputStreamBody dataPart = new InputStreamBody(new ByteArrayInputStream(docData), "application/pdf", job.getName());
             StringBody titlePart = new StringBody(job.getName());
@@ -334,7 +335,7 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
             con.addRequestProperty("X-CloudPrint-Proxy", clientName);
-            con.addRequestProperty("Authorization", "GoogleLogin auth=" + authCode);
+            con.addRequestProperty("Authorization", this.authorizer.getAuthorizationPrefix() + authCode);
 
             CloudPrinters cplist = gson.fromJson(new InputStreamReader(con.getInputStream()), CloudPrinters.class);
 

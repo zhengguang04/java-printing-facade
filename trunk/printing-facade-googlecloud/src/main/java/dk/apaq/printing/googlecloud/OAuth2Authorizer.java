@@ -2,12 +2,21 @@ package dk.apaq.printing.googlecloud;
 
 import com.google.gson.Gson;
 import dk.apaq.printing.core.PrinterException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.InputStreamBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,24 +38,24 @@ public class OAuth2Authorizer implements GoogleCloudPrintPlugin.Authorizer {
     
     protected static class AccessTokenInfo {
 
-        private String accessToken;
-        private int expiresIn;
-        private String tokenType;
+        private String access_token;
+        private int expires_in;
+        private String token_type;
         private String refresh_token;
 
         public AccessTokenInfo(String accessToken, int expiresIn, String tokenType, String refresh_token) {
-            this.accessToken = accessToken;
-            this.expiresIn = expiresIn;
-            this.tokenType = tokenType;
+            this.access_token = accessToken;
+            this.expires_in = expiresIn;
+            this.token_type = tokenType;
             this.refresh_token = refresh_token;
         }
 
         public String getAccessToken() {
-            return accessToken;
+            return access_token;
         }
 
         public int getExpiresIn() {
-            return expiresIn;
+            return expires_in;
         }
 
         public String getRefresh_token() {
@@ -54,7 +63,7 @@ public class OAuth2Authorizer implements GoogleCloudPrintPlugin.Authorizer {
         }
 
         public String getTokenType() {
-            return tokenType;
+            return token_type;
         }
 
         
@@ -70,45 +79,57 @@ public class OAuth2Authorizer implements GoogleCloudPrintPlugin.Authorizer {
     public void authorize(GoogleCloudPrintPlugin.AuthorizeCallback callback) {
         callback.onAuthorized(getAccessToken());
     }
+
+    public String getAuthorizationPrefix() {
+        return "Bearer ";
+    }
     
     private String getAccessToken() throws PrinterException {
         
         if(!isTokenExpired()) {
-            return accessTokenInfo.accessToken;
+            return accessTokenInfo.access_token;
         }
         
-        HttpURLConnection con = null;
+        HttpClient httpclient = null;
+        HttpResponse response = null;
         try {
-            URL url = new URL(tokenUrl);
-            con = (HttpURLConnection) url.openConnection();
-            con.setDoOutput(true);
-            //con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-
-            OutputStreamWriter writer = new OutputStreamWriter(con.getOutputStream());
-            writer.write("code=" + authorizationCode);
-            writer.write("&client_id=" + clientId);
-            writer.write("&client_secret=" + clientSecret);
+            
+            httpclient = new DefaultHttpClient();
+            HttpPost httpPost = new HttpPost(tokenUrl);
+            
+            StringBody codePart = new StringBody(authorizationCode);
+            StringBody clientIdPart = new StringBody(clientId);
+            StringBody clientSecretPart = new StringBody(clientSecret);
+            
+            MultipartEntity reqEntity = new MultipartEntity();
+            reqEntity.addPart("code", codePart);
+            reqEntity.addPart("client_id", clientIdPart);
+            reqEntity.addPart("client_secret", clientSecretPart);
             
             if(accessTokenInfo == null) {
-                writer.write("&grant_type=authorization_code");
-                writer.write("&redirect_uri=http://localhost/oauth2callback");
+                reqEntity.addPart("grant_type", new StringBody("authorization_code"));
+                reqEntity.addPart("redirect_uri", new StringBody("http://localhost/oauth2callback"));
             } else {
-                writer.write("&grant_type=refresh_token");
-                writer.write("&refresh_token="+accessTokenInfo.refresh_token);
+                reqEntity.addPart("grant_type", new StringBody("refresh_token"));
+                reqEntity.addPart("redirect_token", new StringBody(accessTokenInfo.refresh_token));
             }
-            writer.close();
+            
+            httpPost.setEntity(reqEntity);
 
-            accessTokenInfo = gson.fromJson(new InputStreamReader(con.getInputStream()), AccessTokenInfo.class);
+            response = httpclient.execute(httpPost);
+            
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            response.getEntity().writeTo(bos);
+            String data = new String(bos.toByteArray());
+            
+            accessTokenInfo = gson.fromJson(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray())), AccessTokenInfo.class);
 
-            LOG.info("Got new token from Google: " + accessTokenInfo.accessToken);
-            return accessTokenInfo.accessToken;
+            LOG.info("Got new token from Google: " + accessTokenInfo.access_token);
+            return accessTokenInfo.access_token;
         } catch (IOException ex) {
             String message = "Could not retrieve access token from Google. ";
-            if (con instanceof HttpURLConnection) {
-                try {
-                    message += " " + con.getResponseMessage();
-                } catch (IOException ex1) {
-                }
+            if (response != null) {
+                    message += " " + response.getStatusLine();
             }
             throw new PrinterException(message, ex);
         }
@@ -116,7 +137,7 @@ public class OAuth2Authorizer implements GoogleCloudPrintPlugin.Authorizer {
     }
 
     private boolean isTokenExpired() {
-        if (lastTokenUpdate == null || (System.currentTimeMillis() - lastTokenUpdate.getTime()) >= (accessTokenInfo.expiresIn * 1000)) {
+        if (lastTokenUpdate == null || (System.currentTimeMillis() - lastTokenUpdate.getTime()) >= (accessTokenInfo.expires_in * 1000)) {
             return true;
         } else {
             return false;
