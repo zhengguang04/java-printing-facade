@@ -34,7 +34,7 @@ public class OAuth2AuthorizerTest {
                 System.out.println("code: "+authorizationCode);
             }
         };
-        OAuth2Authorizer instance = new OAuth2Authorizer("700939733854.apps.googleusercontent.com", "TwM1ADz1REuRfd5muU89Rejv", "4/zA6-DKzBdmP2n1vsEqzFgHHU3HlE");
-        instance.authorize(callback);
+        OAuth2Authorizer instance = new OAuth2Authorizer("700939733854.apps.googleusercontent.com", "TwM1ADz1REuRfd5muU89Rejv", "", "4/zA6-DKzBdmP2n1vsEqzFgHHU3HlE");
+        //instance.authorize(callback);
     }
 }

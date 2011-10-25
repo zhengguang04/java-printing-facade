@@ -42,7 +42,7 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
     private final Gson gson = new Gson();
     private final Authorizer authorizer;
     private final String clientName;
-    private List<Printer> printers = null;
+    private List<Printer> printers = new ArrayList();
     private String authCode;
 
     public interface Authorizer {
@@ -271,17 +271,17 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
     }
 
     public List<Printer> getPrinters() {
-        if (printers == null) {
-            printers = new ArrayList<Printer>();
-            authorizer.authorize(new AuthorizeCallImpl(this));
-        }
         return printers;
     }
 
+    public void doAuthorize() {
+        authorizer.authorize(new AuthorizeCallImpl(this));
+    }
+    
     public void print(PrinterJob job) {
         try {
             if (authCode == null) {
-                throw new PrinterException("authcode was null");
+                throw new PrinterException("authcode was null. Was doAuthorize() called?");
             }
             
             byte[] docData = PdfUtil.buildPdf(job);
@@ -327,7 +327,7 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
     private void retrieveCloudPrinters() {
 
         if (authCode == null) {
-            throw new PrinterException("authcode was null.");
+            throw new PrinterException("authcode was null. Was doAuthorize() called?");
         }
 
         try {
@@ -339,7 +339,7 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
 
             CloudPrinters cplist = gson.fromJson(new InputStreamReader(con.getInputStream()), CloudPrinters.class);
 
-
+            
             printers = new ArrayList<Printer>();
             printers.addAll(cplist.getPrinters());
             fireChangeEvent();

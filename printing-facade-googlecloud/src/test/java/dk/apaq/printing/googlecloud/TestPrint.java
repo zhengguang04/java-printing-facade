@@ -16,7 +16,7 @@ import java.util.List;
 public class TestPrint {
 
     public static void main(String[] args) throws IOException {
-        OAuth2Authorizer instance = new OAuth2Authorizer("700939733854.apps.googleusercontent.com", "TwM1ADz1REuRfd5muU89Rejv", "4/F7MVfYWRE6ZESprdRF6iGlQuxG2k");
+        OAuth2Authorizer instance = new OAuth2Authorizer("700939733854.apps.googleusercontent.com", "TwM1ADz1REuRfd5muU89Rejv", "", "4/F7MVfYWRE6ZESprdRF6iGlQuxG2k");
         GoogleCloudPrintPlugin cloudPrintPlugin = new GoogleCloudPrintPlugin(instance, "wullawulla");
         
         List<Printer> printers = cloudPrintPlugin.getPrinters();
