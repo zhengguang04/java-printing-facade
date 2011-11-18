@@ -6,10 +6,8 @@ import dk.apaq.printing.core.Printer;
 import dk.apaq.printing.core.PrinterState;
 import java.util.HashMap;
 import java.util.Map;
-import javax.print.DocFlavor;
 import javax.print.PrintService;
 import javax.print.attribute.HashPrintRequestAttributeSet;
-import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.standard.ColorSupported;
 import javax.print.attribute.standard.Media;
 import javax.print.attribute.standard.MediaPrintableArea;
@@ -79,6 +77,10 @@ public class BasicPrinter implements Printer {
         } else {
             return attr.getValue() == javax.print.attribute.standard.PrinterState.IDLE.getValue() ? PrinterState.Idle : PrinterState.Busy;
         }
+    }
+    
+    public PrintService getAwtPrintService() {
+        return ps;
     }
 
 
