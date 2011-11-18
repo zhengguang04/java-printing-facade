@@ -1,0 +1,8 @@
+To prepare release:
+mvn release:prepare -Dusername=<svnusername> -Dpassword=<svnpassword>
+
+To perform release:
+mvn release:perform -Darguments=-Dgpg.passphrase=<gpgpassphrase>
+
+
+
