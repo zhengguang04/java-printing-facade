@@ -78,6 +78,7 @@ public class BasicPlugin extends AbstractPrinterManagerPlugin {
     @Override
     public void print(PrinterJob job) {
         try {
+            BasicPrinter printer = (BasicPrinter) job.getPrinter();
             PageFormat pf = AWTUtil.generatePageformat(job.getPaper(), job.getMargin(), job.getOrientation());
             PrinterJobPrintable printable = new PrinterJobPrintable(job);
             Paper paper = job.getPaper();
@@ -89,6 +90,7 @@ public class BasicPlugin extends AbstractPrinterManagerPlugin {
                                                 MediaSize.MM));
             attributes.add(AWTUtil.getPrintableArea(paper, margin));
             java.awt.print.PrinterJob awtJob = java.awt.print.PrinterJob.getPrinterJob();
+            awtJob.setPrintService(printer.getAwtPrintService());
             awtJob.setPrintable(printable, pf);
             awtJob.print(attributes);
         } catch (PrinterException ex) {
