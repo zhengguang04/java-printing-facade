@@ -44,7 +44,7 @@ public class BasicPluginTest extends TestCase {
         PrinterJob job = PrinterJob.getBuilder(manager.getDefaultPrinter(), img).
                 setPaper(Paper.A4).
                 build();
-        manager.print(job);
+        //manager.print(job);
         
     }
 
