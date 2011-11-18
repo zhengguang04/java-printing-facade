@@ -4,11 +4,11 @@
     <parent>
         <artifactId>printing-facade</artifactId>
         <groupId>dk.apaq.printing</groupId>
-        <version>1.2.4-SNAPSHOT</version>
+        <version>1.2.4</version>
     </parent>
     <groupId>dk.apaq.printing</groupId>
     <artifactId>printing-facade-googlecloud</artifactId>
-    <version>1.2.4-SNAPSHOT</version>
+    <version>1.2.4</version>
     <name>printing-facade-googlecloud</name>
     <url>http://maven.apache.org</url>
     <properties>
