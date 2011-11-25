@@ -1,15 +1,19 @@
 package dk.apaq.printing.image;
 
+import dk.apaq.printing.core.Paper;
 import dk.apaq.printing.core.PrinterJob;
 import dk.apaq.printing.core.util.InMemorySpooler;
 import dk.apaq.printing.core.util.Spooler;
 import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import javax.imageio.ImageIO;
 import junit.framework.TestCase;
 
 /**
@@ -47,7 +51,7 @@ public class ImagePrintPluginTest extends TestCase {
                 graphics.drawString("Dette er en test.", 100, 100);
                 return PAGE_EXISTS;
             }
-        }).build();
+        }).setPaper(Paper.A4).build();
         pdfPrintPlugin.print(job);
         
         assertNotNull(spoolerHandler.getLastData());
@@ -55,6 +59,18 @@ public class ImagePrintPluginTest extends TestCase {
         
         ZipInputStream zin = new ZipInputStream(new ByteArrayInputStream(spoolerHandler.getLastData()));
         assertTrue(zin.available()==1);
+        
+        ZipEntry entry = zin.getNextEntry();
+        if(!entry.getName().endsWith(".png")) {
+            entry = zin.getNextEntry();
+        }
+        
+        if(!entry.getName().endsWith(".png")) {
+            fail("No images in zipfile.");
+        }
+        
+        BufferedImage img = ImageIO.read(zin);
+        assertEquals(Paper.A4.getWidth() / 10 / 2.54 * 300, img.getWidth(), 0.5);
         zin.close();
     }
 }
