@@ -3,7 +3,11 @@ package dk.apaq.printing.remoteclient;
 import dk.apaq.printing.core.Margin;
 import dk.apaq.printing.core.Paper;
 import dk.apaq.printing.core.Printer;
+import dk.apaq.printing.core.PrinterJob;
+import dk.apaq.printing.core.PrinterJob.DataType;
 import dk.apaq.printing.core.PrinterState;
+import java.awt.print.Pageable;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,13 +22,15 @@ public class RemoteClientPrinter implements Printer {
     private final boolean colorSupported;
     private final Map<Paper, Margin> paperMap;
     private final PrinterState state;
-
-    public RemoteClientPrinter(String id, String name, String description, boolean colorSupported, Map<Paper, Margin> paperMap, PrinterState state) {
+    private final List<PrinterJob.DataType> datatypes;
+    
+    public RemoteClientPrinter(String id, String name, String description, boolean colorSupported, Map<Paper, Margin> paperMap, List<PrinterJob.DataType> datatypes, PrinterState state) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.colorSupported = colorSupported;
         this.paperMap = paperMap;
+        this.datatypes = datatypes;
         this.state = state;
     }
 
@@ -62,4 +68,7 @@ public class RemoteClientPrinter implements Printer {
         return state;
     }
 
+    public boolean supportDatatype(DataType dataType) {
+        return datatypes.contains(dataType);
+    }
 }

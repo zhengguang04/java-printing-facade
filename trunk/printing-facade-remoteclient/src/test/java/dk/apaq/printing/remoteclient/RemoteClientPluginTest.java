@@ -18,6 +18,7 @@ import dk.apaq.printing.core.PrinterState;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,7 +97,9 @@ public class RemoteClientPluginTest {
         printerManager.addPlugin(clientPlugin);
         
         Map<Paper, Margin> paperMap = new HashMap<Paper, Margin>();
-        RemoteClientPrinter clientPrinter = new RemoteClientPrinter("id", "name", "decr", true, paperMap, PrinterState.Idle);
+        List<PrinterJob.DataType> datatypes = new ArrayList<PrinterJob.DataType>();
+        datatypes.add(PrinterJob.DataType.Pageable);
+        RemoteClientPrinter clientPrinter = new RemoteClientPrinter("id", "name", "decr", true, paperMap, datatypes, PrinterState.Idle);
         
         List<RemoteClientPrinter> printers = new ArrayList<RemoteClientPrinter>();
         printers.add(clientPrinter);

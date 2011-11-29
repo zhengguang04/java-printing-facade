@@ -3,8 +3,12 @@ package dk.apaq.printing.remoteclient;
 import dk.apaq.printing.core.Margin;
 import dk.apaq.printing.core.Paper;
 import dk.apaq.printing.core.Printer;
+import dk.apaq.printing.core.PrinterJob;
 import dk.apaq.printing.core.PrinterState;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -59,6 +63,7 @@ public class PropertiesPrinterParser {
         String description = properties.getProperty(currentPrinterPrefix + "description");
         boolean colorSupported = "true".equalsIgnoreCase(properties.getProperty(currentPrinterPrefix + "colorSupported"));
         
+        
         PrinterState state;
         try{
             state = PrinterState.valueOf(properties.getProperty(currentPrinterPrefix + "state"));
@@ -78,7 +83,18 @@ public class PropertiesPrinterParser {
             paperMap.put(paper, margin);
         }
         
-        return new RemoteClientPrinter(id, name, description, colorSupported, paperMap, state);
+        List<PrinterJob.DataType> datatypes = new ArrayList<PrinterJob.DataType>();
+        int datatypeCount = Integer.parseInt(properties.getProperty(currentPrinterPrefix + "datatypes.count"));
+        for(int i=0;i<datatypeCount;i++) {
+            String typeString = properties.getProperty(currentPrinterPrefix + "datatypes." + i);
+            PrinterJob.DataType dataType = PrinterJob.DataType.valueOf(typeString);
+            
+            datatypes.add(dataType);
+        }
+        
+        return new RemoteClientPrinter(id, name, description, colorSupported, paperMap, datatypes, state);
     }
+    
+
 
 }

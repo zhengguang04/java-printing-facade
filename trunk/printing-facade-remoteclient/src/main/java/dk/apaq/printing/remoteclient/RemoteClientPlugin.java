@@ -5,6 +5,7 @@ import dk.apaq.printing.core.Printer;
 import dk.apaq.printing.core.PrinterException;
 import dk.apaq.printing.core.PrinterJob;
 import dk.apaq.printing.core.util.ImageUtil;
+import dk.apaq.printing.core.util.PsUtil;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,7 +62,11 @@ public class RemoteClientPlugin extends AbstractPrinterManagerPlugin {
 
     private byte[] buildZip(PrinterJob job) {
         try {
-            return ImageUtil.buildImage(job, RESOLUTION);
+            if(job.getPrinter().supportDatatype(PrinterJob.DataType.Postscript)) {
+                return PsUtil.buildPostscript(job, true);
+            } else {
+                return ImageUtil.buildImage(job, RESOLUTION);
+            }
         } catch (IOException ex) {
             throw new PrinterException("Unable to print.", ex);
         }
