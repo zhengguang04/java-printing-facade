@@ -7,10 +7,11 @@ import dk.apaq.printing.core.Paper;
 import dk.apaq.printing.core.Printer;
 import dk.apaq.printing.core.PrinterException;
 import dk.apaq.printing.core.PrinterJob;
+import dk.apaq.printing.core.PrinterJob.DataType;
 import dk.apaq.printing.core.PrinterState;
 import dk.apaq.printing.core.util.PdfUtil;
+import java.awt.print.Pageable;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -258,6 +259,15 @@ public class GoogleCloudPrintPlugin extends AbstractPrinterManagerPlugin {
 
         public PrinterState getState() {
             return PrinterState.Idle;
+        }
+               
+        public boolean supportDatatype(DataType dataType) {
+            switch(dataType) {
+                case Pageable:
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 
