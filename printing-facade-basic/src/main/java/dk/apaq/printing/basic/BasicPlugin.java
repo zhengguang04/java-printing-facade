@@ -16,8 +16,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.print.Doc;
+import javax.print.DocFlavor;
+import javax.print.DocPrintJob;
+import javax.print.PrintException;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
+import javax.print.SimpleDoc;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.standard.MediaPrintableArea;
@@ -80,7 +85,6 @@ public class BasicPlugin extends AbstractPrinterManagerPlugin {
         try {
             BasicPrinter printer = (BasicPrinter) job.getPrinter();
             PageFormat pf = AWTUtil.generatePageformat(job.getPaper(), job.getMargin(), job.getOrientation());
-            PrinterJobPrintable printable = new PrinterJobPrintable(job);
             Paper paper = job.getPaper();
             Margin margin = job.getMargin();
 
@@ -89,11 +93,21 @@ public class BasicPlugin extends AbstractPrinterManagerPlugin {
                                                 ((Double)paper.getHeight()).floatValue(),
                                                 MediaSize.MM));
             attributes.add(AWTUtil.getPrintableArea(paper, margin));
-            java.awt.print.PrinterJob awtJob = java.awt.print.PrinterJob.getPrinterJob();
-            awtJob.setPrintService(printer.getAwtPrintService());
-            awtJob.setPrintable(printable, pf);
-            awtJob.print(attributes);
+            
+            if(job.getDataType() == PrinterJob.DataType.Postscript) {
+                DocPrintJob docPrintJob = printer.getAwtPrintService().createPrintJob();
+                Doc doc = new SimpleDoc(job.getData(), DocFlavor.BYTE_ARRAY.POSTSCRIPT, null);
+                docPrintJob.print(doc, attributes);
+            } else {
+                PrinterJobPrintable printable = new PrinterJobPrintable(job);
+                java.awt.print.PrinterJob awtJob = java.awt.print.PrinterJob.getPrinterJob();
+                awtJob.setPrintService(printer.getAwtPrintService());
+                awtJob.setPrintable(printable, pf);
+                awtJob.print(attributes);
+            }
         } catch (PrinterException ex) {
+            throw new dk.apaq.printing.core.PrinterException(ex);
+        } catch (PrintException ex) {
             throw new dk.apaq.printing.core.PrinterException(ex);
         }
 
