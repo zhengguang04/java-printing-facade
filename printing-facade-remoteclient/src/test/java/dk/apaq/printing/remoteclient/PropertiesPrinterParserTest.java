@@ -48,7 +48,9 @@ public class PropertiesPrinterParserTest {
                             "printers.0.state=Idle\n" +
                             "printers.0.papers.count=1\n" +
                             "printers.0.papers.0.size=210mm x 297mm\n" +
-                            "printers.0.papers.0.margin=5mm, 10mm, 5mm, 10mm\n";
+                            "printers.0.papers.0.margin=5mm, 10mm, 5mm, 10mm\n" +
+                            "printers.0.datatypes.count=1\n"+
+                            "printers.0.datatypes.0=Pageable";
 
 
     /**
