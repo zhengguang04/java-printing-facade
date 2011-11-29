@@ -1,5 +1,6 @@
 package dk.apaq.printing.core.util;
 
+import com.sun.tools.javac.zip.ZipFileIndexEntry;
 import dk.apaq.printing.core.Margin;
 import dk.apaq.printing.core.Paper;
 import dk.apaq.printing.core.PrinterException;
@@ -8,8 +9,11 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import javax.print.Doc;
 import javax.print.DocFlavor;
 import javax.print.DocPrintJob;
@@ -83,5 +87,26 @@ public class PsUtil {
             throw new PrinterException("Streaming to postscript file is not supported on this platform.");
         }
 
+    }
+    
+    public static byte[] buildPostscript(PrinterJob job, boolean zip) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        
+        if(zip) {
+            ZipOutputStream zos = new ZipOutputStream(bos);
+            
+            ZipEntry jobinfoentry = new ZipEntry("job.properties");
+            zos.putNextEntry(jobinfoentry);
+            JobInfoUtil.writeJobInfo(job, zos);
+            
+            ZipEntry entry = new ZipEntry("job.ps");
+            zos.putNextEntry(entry);
+            PsUtil.buildPostscript(job, zos);
+            
+            zos.close();
+        } else {
+            PsUtil.buildPostscript(job, bos);
+        }
+        return bos.toByteArray();
     }
 }

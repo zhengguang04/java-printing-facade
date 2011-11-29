@@ -20,46 +20,46 @@ public class PrinterJob {
     private static int jobCount=0;
     
     private final Printer printer;
-    private Pageable pageable;
-    private final Object data;
+    private final Pageable pageable;
+    private final byte[] data;
     private int copies = 1;
     private Paper paper = Paper.A4;
     private Margin margin = new Margin(0, 0, 0, 0);
     private Orientation orientation = Orientation.Portrait;
     private boolean color;
     private String name = "PrinterJob-" + jobCount++;
+    private final DataType dataType;
 
+    public enum DataType {
+        Pageable, Postscript
+    }
+    
     private static class SimplePageable implements Pageable {
 
         private final Printable printable;
         private final int numberOfPages;
-        private final Paper paper;
-        private final Margin margin;
-        private final Orientation orientation;
-
-        public SimplePageable(Printable printable, Paper paper, Margin margin, Orientation orientation) {
+        private PrinterJob printerJob;
+        
+        public SimplePageable(Printable printable) {
             this.printable = printable;
-            this.paper = paper;
             this.numberOfPages = -1;
-            this.margin = margin;
-            this.orientation = orientation;
         }
 
-        public SimplePageable(Printable printable, Paper paper, Margin margin, Orientation orientation, int numberOfPages) {
+        public SimplePageable(Printable printable, int numberOfPages) {
             this.printable = printable;
             this.numberOfPages = numberOfPages;
-            this.paper = paper;
-            this.margin = margin;
-            this.orientation = orientation;
         }
 
+        private void setPrinterJob(PrinterJob job) {
+            this.printerJob = job;
+        }
 
         public int getNumberOfPages() {
             return numberOfPages;
         }
 
         public PageFormat getPageFormat(int pageIndex) throws IndexOutOfBoundsException {
-            return AWTUtil.generatePageformat(paper, margin, orientation);
+            return AWTUtil.generatePageformat(printerJob.getPaper(), printerJob.margin, printerJob.orientation);
         }
 
         public Printable getPrintable(int pageIndex) throws IndexOutOfBoundsException {
@@ -144,9 +144,18 @@ public class PrinterJob {
 
     }
 
-    private PrinterJob(Printer printer, Object data) {
+    private PrinterJob(Printer printer, Pageable pageable) {
         this.printer = printer;
-        this.data = data;
+        this.pageable = pageable;
+        this.data = null;
+        this.dataType = DataType.Pageable;
+    }
+    
+    private PrinterJob(Printer printer, DataType dataType, byte[] data) {
+        this.printer = printer;
+        this.data=data;
+        this.pageable = null;
+        this.dataType = dataType.Postscript;
     }
 
     public String getName() {
@@ -178,56 +187,47 @@ public class PrinterJob {
     }
 
     public int getNumberOfPages() {
-        ensurePageableExists();
-        return pageable.getNumberOfPages();
+        return pageable == null ? -1 : pageable.getNumberOfPages();
     }
 
     public boolean render(Graphics2D gfx, int pageNumber) {
-        ensurePageableExists();
-        return doRenderPageable(gfx, pageNumber, pageable);
+        return pageable == null ? false : doRenderPageable(gfx, pageNumber, pageable);
     }
 
-    public static PrinterJobBuilder getBuilder(Printer printer, String text) {
+    /*public static PrinterJobBuilder getBuilder(Printer printer, String text) {
         return new PrinterJobBuilder(new PrinterJob(printer, text));
-    }
+    }*/
 
+    public static PrinterJobBuilder getBuilder(Printer printer, DataType dataType, byte[] data) {
+        PrinterJob job = new PrinterJob(printer, dataType, data);
+        return new PrinterJobBuilder(job);
+    }
+    
     public static PrinterJobBuilder getBuilder(Printer printer, BufferedImage image) {
-        return new PrinterJobBuilder(new PrinterJob(printer, image));
+        Printable printable = new ImagePrintable((BufferedImage) image);
+        SimplePageable pageable = new SimplePageable(printable, 1);
+        PrinterJob job = new PrinterJob(printer, pageable);
+        pageable.setPrinterJob(job);
+        return new PrinterJobBuilder(job);
     }
 
     public static PrinterJobBuilder getBuilder(Printer printer, Printable printable) {
-        return new PrinterJobBuilder(new PrinterJob(printer, printable));
+        SimplePageable pageable = new SimplePageable(printable, 1);
+        PrinterJob job = new PrinterJob(printer, pageable);
+        pageable.setPrinterJob(job);
+        return new PrinterJobBuilder(job);
     }
 
     public static PrinterJobBuilder getBuilder(Printer printer, Pageable pageable) {
         return new PrinterJobBuilder(new PrinterJob(printer, pageable));
     }
 
-    private void ensurePageableExists() {
-        if(pageable!=null) {
-            return;
-        }
+    public DataType getDataType() {
+        return dataType;
+    }
 
-        if(data instanceof Pageable) {
-            pageable = (Pageable) data;
-            return;
-        }
-
-        if(data instanceof BufferedImage) {
-            Printable printable = new ImagePrintable((BufferedImage) data);
-            pageable = new SimplePageable(printable, paper, margin, orientation, 1);
-            return;
-        }
-
-        if(data instanceof Printable) {
-            pageable = new SimplePageable((Printable) data,paper, margin, orientation);
-            return;
-        }
-        
-        if(data instanceof String) {
-            throw new UnsupportedOperationException("Printing text is not yet supported.");
-        }
-
+    public byte[] getData() {
+        return data;
     }
 
     private boolean doRenderPageable(Graphics2D gfx, int page, Pageable pageable) {

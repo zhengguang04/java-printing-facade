@@ -1,5 +1,7 @@
 package dk.apaq.printing.core;
 
+import dk.apaq.printing.core.PrinterJob.DataType;
+
 /**
  *
  * @author michaelzachariassenkrog
@@ -47,5 +49,12 @@ public class MockPrinter implements Printer {
     public PrinterState getState() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    @Override
+    public boolean supportDatatype(DataType dataType) {
+        return true;
+    }
+    
+    
 
 }
