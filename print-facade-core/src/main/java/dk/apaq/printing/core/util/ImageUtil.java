@@ -33,7 +33,7 @@ public class ImageUtil {
 
             ZipEntry jobinfoentry = new ZipEntry("job.properties");
             zout.putNextEntry(jobinfoentry);
-            writeJobInfo(job, zout);
+            JobInfoUtil.writeJobInfo(job, zout);
             zout.closeEntry();
 
             Paper paper = job.getPaper();
@@ -73,15 +73,5 @@ public class ImageUtil {
         return os.toByteArray();
     }
     
-    private static void writeJobInfo(PrinterJob printerJob, OutputStream os) throws IOException {
-
-        Writer w = new OutputStreamWriter(os);
-        Properties p = new Properties();
-        p.setProperty("printerId", printerJob.getPrinter().getId());
-        p.setProperty("paper", printerJob.getPaper().toString());
-        p.setProperty("margin", printerJob.getMargin().toString());
-        p.setProperty("copies", Integer.toString(printerJob.getCopies()));
-        p.store(w, null);
-
-    }
+    
 }

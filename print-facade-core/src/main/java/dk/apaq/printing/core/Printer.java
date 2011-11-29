@@ -11,6 +11,7 @@ public interface Printer {
     String getDescription();
 
     boolean supportsColor();
+    boolean supportDatatype(PrinterJob.DataType dataType);
     Paper[] getSupportedPapers();
     Margin getPhysicalMargin(Paper paperSize);
 
