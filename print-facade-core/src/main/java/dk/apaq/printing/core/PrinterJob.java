@@ -182,9 +182,9 @@ public class PrinterJob {
         return pageable.getNumberOfPages();
     }
 
-    public void render(Graphics2D gfx, int pageNumber) {
+    public boolean render(Graphics2D gfx, int pageNumber) {
         ensurePageableExists();
-        doRenderPageable(gfx, pageNumber, pageable);
+        return doRenderPageable(gfx, pageNumber, pageable);
     }
 
     public static PrinterJobBuilder getBuilder(Printer printer, String text) {
@@ -230,11 +230,11 @@ public class PrinterJob {
 
     }
 
-    private void doRenderPageable(Graphics2D gfx, int page, Pageable pageable) {
+    private boolean doRenderPageable(Graphics2D gfx, int page, Pageable pageable) {
         try {
             PageFormat format = pageable.getPageFormat(page);
             Printable printable = pageable.getPrintable(page);
-            printable.print(gfx, format, page);
+            return printable.print(gfx, format, page) == Printable.PAGE_EXISTS;
         } catch (PrinterException ex) {
             throw new dk.apaq.printing.core.PrinterException(ex);
         }
