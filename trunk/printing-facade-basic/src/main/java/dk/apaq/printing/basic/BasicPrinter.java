@@ -3,9 +3,11 @@ package dk.apaq.printing.basic;
 import dk.apaq.printing.core.Margin;
 import dk.apaq.printing.core.Paper;
 import dk.apaq.printing.core.Printer;
+import dk.apaq.printing.core.PrinterJob.DataType;
 import dk.apaq.printing.core.PrinterState;
 import java.util.HashMap;
 import java.util.Map;
+import javax.print.DocFlavor;
 import javax.print.PrintService;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.standard.ColorSupported;
@@ -129,6 +131,23 @@ public class BasicPrinter implements Printer {
         }
         
     }
+
+    @Override
+    public boolean supportDatatype(DataType dataType) {
+        switch(dataType) {
+            case Pageable:
+                return true;
+            case Postscript:
+                for(DocFlavor df : ps.getSupportedDocFlavors()) {
+                    if(df.getMimeType().equalsIgnoreCase(DocFlavor.BYTE_ARRAY.POSTSCRIPT.getMimeType())) {
+                        return true;
+                    }
+                }
+        }
+        return false;
+    }
+    
+    
     
 
 }
