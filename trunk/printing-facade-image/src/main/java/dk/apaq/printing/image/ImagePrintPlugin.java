@@ -6,6 +6,7 @@ import dk.apaq.printing.core.Paper;
 import dk.apaq.printing.core.Printer;
 import dk.apaq.printing.core.PrinterException;
 import dk.apaq.printing.core.PrinterJob;
+import dk.apaq.printing.core.PrinterJob.DataType;
 import dk.apaq.printing.core.PrinterState;
 import dk.apaq.printing.core.util.ImageUtil;
 import dk.apaq.printing.core.util.Spooler;
@@ -57,6 +58,17 @@ public class ImagePrintPlugin extends AbstractPrinterManagerPlugin {
         public PrinterState getState() {
             return PrinterState.Idle;
         }
+
+        public boolean supportDatatype(DataType dataType) {
+            switch(dataType) {
+                case Pageable:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        
+        
     }
 
     public ImagePrintPlugin(Spooler spooler) {
@@ -89,5 +101,7 @@ public class ImagePrintPlugin extends AbstractPrinterManagerPlugin {
         }
 
     }
+    
+    
     
 }
