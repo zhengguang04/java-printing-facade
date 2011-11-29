@@ -7,9 +7,11 @@ import dk.apaq.printing.core.Paper;
 import dk.apaq.printing.core.Printer;
 import dk.apaq.printing.core.PrinterException;
 import dk.apaq.printing.core.PrinterJob;
+import dk.apaq.printing.core.PrinterJob.DataType;
 import dk.apaq.printing.core.PrinterState;
 import dk.apaq.printing.core.util.PdfUtil;
 import dk.apaq.printing.core.util.Spooler;
+import java.awt.print.Pageable;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -54,6 +56,15 @@ public class PdfPrintPlugin extends AbstractPrinterManagerPlugin {
 
         public PrinterState getState() {
             return PrinterState.Idle;
+        }
+        
+        public boolean supportDatatype(DataType dataType) {
+            switch(dataType) {
+                case Pageable:
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 
