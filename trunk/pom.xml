@@ -40,6 +40,7 @@
     <module>printing-facade-googlecloud</module>
     <module>printing-facade-pdf</module>
     <module>printing-facade-image</module>
+    <module>printing-facade-ps</module>
   </modules>
 
     <distributionManagement>
