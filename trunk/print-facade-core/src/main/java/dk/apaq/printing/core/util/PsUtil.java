@@ -23,6 +23,7 @@ import javax.print.StreamPrintService;
 import javax.print.StreamPrintServiceFactory;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.standard.MediaPrintableArea;
 import javax.print.attribute.standard.MediaSize;
 import javax.print.attribute.standard.MediaSizeName;
 
@@ -70,6 +71,10 @@ public class PsUtil {
 
                 PrintRequestAttributeSet aset = new HashPrintRequestAttributeSet();
                 MediaSizeName mediaSizeName = MediaSize.findMedia(((Double) paper.getWidth()).floatValue(), ((Double) paper.getHeight()).floatValue(), MediaSize.MM);
+                
+                if(mediaSizeName==null) {
+                    throw new PrinterException("No mediasize found for given paper [paper="+paper.toString()+"]");
+                }
                 aset.add(mediaSizeName);
                 aset.add(AWTUtil.getPrintableArea(paper, margin));
                 
