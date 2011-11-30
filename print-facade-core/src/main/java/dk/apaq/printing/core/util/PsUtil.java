@@ -1,6 +1,5 @@
 package dk.apaq.printing.core.util;
 
-import com.sun.tools.javac.zip.ZipFileIndexEntry;
 import dk.apaq.printing.core.Margin;
 import dk.apaq.printing.core.Paper;
 import dk.apaq.printing.core.PrinterException;
@@ -23,7 +22,6 @@ import javax.print.StreamPrintService;
 import javax.print.StreamPrintServiceFactory;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
-import javax.print.attribute.standard.MediaPrintableArea;
 import javax.print.attribute.standard.MediaSize;
 import javax.print.attribute.standard.MediaSizeName;
 

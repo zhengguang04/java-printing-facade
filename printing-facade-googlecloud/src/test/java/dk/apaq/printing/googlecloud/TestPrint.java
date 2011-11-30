@@ -8,6 +8,7 @@ import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.io.IOException;
 import java.util.List;
+import org.junit.Test;
 
 /**
  *
@@ -15,6 +16,11 @@ import java.util.List;
  */
 public class TestPrint {
 
+    @Test
+    public void dummy() {
+        
+    }
+    
     public static void main(String[] args) throws IOException {
         OAuth2Authorizer instance = new OAuth2Authorizer("700939733854.apps.googleusercontent.com", "TwM1ADz1REuRfd5muU89Rejv", "", "4/F7MVfYWRE6ZESprdRF6iGlQuxG2k");
         GoogleCloudPrintPlugin cloudPrintPlugin = new GoogleCloudPrintPlugin(instance, "wullawulla");
