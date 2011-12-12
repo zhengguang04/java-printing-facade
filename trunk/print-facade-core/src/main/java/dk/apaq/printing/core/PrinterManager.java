@@ -70,11 +70,19 @@ public class PrinterManager implements PrinterListChangeNotifier {
         throw new PrinterException("Printer specified in job is not maintained by this manager. [id=" + job.getPrinter().getId() + "]");
     }
 
+    @Override
     public void addListener(PrinterListChangeListener listener) {
         this.listeners.add(listener);
     }
 
+    @Override
     public void removeListener(PrinterListChangeListener listener) {
         this.listeners.remove(listener);
     }
+
+    public void setDefaultPrinterDecisionMaker(DefaultPrinterDecisionMaker defaultPrinterDecisionMaker) {
+        this.defaultPrinterDecisionMaker = defaultPrinterDecisionMaker;
+    }
+    
+    
 }

@@ -186,6 +186,9 @@ public class PrinterJob {
         return printer;
     }
 
+    /**
+     * Returns the number of pages or -1 if number of pages is unknown in advance.
+     */
     public int getNumberOfPages() {
         return pageable == null ? -1 : pageable.getNumberOfPages();
     }
@@ -212,7 +215,7 @@ public class PrinterJob {
     }
 
     public static PrinterJobBuilder getBuilder(Printer printer, Printable printable) {
-        SimplePageable pageable = new SimplePageable(printable, 1);
+        SimplePageable pageable = new SimplePageable(printable, -1);
         PrinterJob job = new PrinterJob(printer, pageable);
         pageable.setPrinterJob(job);
         return new PrinterJobBuilder(job);
